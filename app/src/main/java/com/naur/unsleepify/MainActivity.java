@@ -3,7 +3,9 @@ package com.naur.unsleepify;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -16,9 +18,16 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
+// todo get playlist, play songs
+// todo some error handling, would like to know why it failed since i expect it to
+// todo sets volume
+// todo stops if minimized, but runs when locked
+// runs at a time
+// can get song name. though can always shazam it kek
 public class MainActivity extends Activity implements
         SpotifyPlayer.NotificationCallback, ConnectionStateCallback
 {
+
     // TODO: Replace with your client ID
     private static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
 
@@ -71,12 +80,11 @@ public class MainActivity extends Activity implements
         }
     }
 
-
     @Override
     protected void onDestroy() {
+        Spotify.destroyPlayer(this);
         super.onDestroy();
     }
-
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
@@ -97,12 +105,40 @@ public class MainActivity extends Activity implements
         }
     }
 
+    private void updateTextToSongInformation(){
+        if(mPlayer.getMetadata().currentTrack!=null) {
+            (   (TextView)findViewById(R.id.myAwesomeTextView)).setText(mPlayer.getMetadata().currentTrack.artistName + " - " + mPlayer.getMetadata().currentTrack.name);
+    }};
+
     @Override
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
 
-        // This is the line that plays a song.
-        mPlayer.playUri(null, "spotify:track:18Xn1vVsLNSikhYqeGtgaK", 0, 0);
+        final Player.OperationCallback cb=new Player.OperationCallback() {
+            @Override
+            public void onSuccess() {
+                updateTextToSongInformation();
+            }
+
+            @Override
+            public void onError(Error error) {
+
+            }
+        };
+        mPlayer.playUri(cb, "spotify:playlist:3pBnQakqa3Cd13p4qQP5Rn", 0, 0);
+
+
+
+
+           final Handler handler = new Handler();
+           final int delay = 5000;
+        handler.postDelayed(new Runnable(){
+            public void run(){
+                handler.postDelayed(this, delay);
+                mPlayer.skipToNext(cb);
+            }
+        }, delay);
+
     }
 
     @Override
