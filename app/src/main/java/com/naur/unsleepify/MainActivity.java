@@ -1,11 +1,17 @@
 package com.naur.unsleepify;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -18,33 +24,39 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
-// todo get playlist, play songs
+import java.io.Serializable;
+import java.util.Calendar;
+
+//√ todo get playlist, play songs
 // todo some error handling, would like to know why it failed since i expect it to
 // todo sets volume
 // todo stops if minimized, but runs when locked
 // runs at a time
 // can get song name. though can always shazam it kek
+// lock screen notif
+// show art. pref for band and song off album.
+// configure the time or times using gui
 public class MainActivity extends Activity implements
         SpotifyPlayer.NotificationCallback, ConnectionStateCallback
 {
 
     // TODO: Replace with your client ID
-    private static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
+    public static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
 
     // TODO: Replace with your redirect URI
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
 
-    private Player mPlayer;
+    public static Player mPlayer;
 
     // Request code that will be used to verify if the result comes from correct activity
     // Can be any integer
     private static final int REQUEST_CODE = 1337;
-
+    public static TextView view;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        view=(TextView)findViewById(R.id.myAwesomeTextView);
         // The only thing that's different is we added the 5 lines below.
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming"});
@@ -82,7 +94,10 @@ public class MainActivity extends Activity implements
 
     @Override
     protected void onDestroy() {
-        Spotify.destroyPlayer(this);
+        Spotify.destroyPlayer(this); // TODO don't leak
+//        Toast.makeText(this.getApplicationContext(),"Nup destroyed",Toast.LENGTH_SHORT).show();
+        Log.d("MainActivity", "nup destroyed");
+
         super.onDestroy();
     }
     @Override
@@ -104,41 +119,39 @@ public class MainActivity extends Activity implements
                 break;
         }
     }
+    final Player.OperationCallback cb = new Player.OperationCallback() {
+        @Override
+        public void onSuccess() {
+            //updateTextToSongInformation();
+        }
 
-    private void updateTextToSongInformation(){
-        if(mPlayer.getMetadata().currentTrack!=null) {
-            (   (TextView)findViewById(R.id.myAwesomeTextView)).setText(mPlayer.getMetadata().currentTrack.artistName + " - " + mPlayer.getMetadata().currentTrack.name);
-    }};
+        @Override
+        public void onError(Error error) {
+
+        }
+    };
 
     @Override
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
 
-        final Player.OperationCallback cb=new Player.OperationCallback() {
-            @Override
-            public void onSuccess() {
-                updateTextToSongInformation();
-            }
+        AlarmManager am=(AlarmManager)this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
 
-            @Override
-            public void onError(Error error) {
+        Intent intent = new Intent(this.getApplicationContext(), BroadcastReceiver2.class);
 
-            }
-        };
+        PendingIntent pi = PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
+        Toast.makeText(this.getApplicationContext(),"About to alarm...",Toast.LENGTH_SHORT).show();
+        Calendar alarmStartTime = Calendar.getInstance();
+        Calendar now = Calendar.getInstance();
+        alarmStartTime.set(Calendar.HOUR_OF_DAY, 17);
+        alarmStartTime.set(Calendar.MINUTE, 10);
+        alarmStartTime.set(Calendar.SECOND, -5);
+        if (now.after(alarmStartTime)) {
+            Log.d("Hey","Added a day");
+            alarmStartTime.add(Calendar.DATE, 1);
+        }
+        am.setRepeating(AlarmManager.RTC_WAKEUP, alarmStartTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY , pi);
         mPlayer.playUri(cb, "spotify:playlist:3pBnQakqa3Cd13p4qQP5Rn", 0, 0);
-
-
-
-
-           final Handler handler = new Handler();
-           final int delay = 5000;
-        handler.postDelayed(new Runnable(){
-            public void run(){
-                handler.postDelayed(this, delay);
-                mPlayer.skipToNext(cb);
-            }
-        }, delay);
-
     }
 
     @Override
