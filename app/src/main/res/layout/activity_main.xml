@@ -2,39 +2,52 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:orientation="vertical"
 
     tools:context=".MainActivity">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:weightSum="1"
-        >
-    <NumberPicker
-        android:id="@+id/HourPicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.5"/>
+        android:weightSum="1">
 
-    <NumberPicker
-        android:id="@+id/MinutePicker"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.5"/>
+        <NumberPicker
+            android:id="@+id/HourPicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5" />
+
+        <NumberPicker
+            android:id="@+id/MinutePicker"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5" />
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
-        >
-    <Button
-        android:id="@+id/SubmitButton"
+        android:layout_height="wrap_content">
+
+        <Button
+            android:id="@+id/SubmitButton"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Make alarm yo" />
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Make alarm yo"
-        />
+        android:layout_height="fill_parent">
+
+        <TextView
+            android:id="@+id/ExistingAlarm"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:text="No alarm set..."
+
+            />
     </LinearLayout>
 </LinearLayout>
 
