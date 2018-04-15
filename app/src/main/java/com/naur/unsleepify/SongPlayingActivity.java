@@ -2,7 +2,9 @@ package com.naur.unsleepify;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,18 +19,33 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
+import java.util.List;
+import java.util.Random;
+
+import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Album;
+import kaaes.spotify.webapi.android.models.PlaylistTrack;
+import retrofit.Callback;
+import retrofit.client.Response;
+
+import static com.naur.unsleepify.SongPlayingActivity.CLIENT_ID;
+
 public class SongPlayingActivity extends Activity implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback {
     public static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
     private Player musicPlayer;
     private static final int REQUEST_CODE = 1337;
     private TextView view;
+    private SpotifyApi spotifyApi = new SpotifyApi();
+    private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";
+    private String playlistUserId = "soundrop";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_playing);
-        view = (TextView) findViewById(R.id.songDetails);
+        view = findViewById(R.id.songDetails);
 
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming"});
@@ -40,10 +57,12 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == REQUEST_CODE) {
-            AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
+            final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
+                spotifyApi.setAccessToken(response.getAccessToken());
                 Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
-                Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+                SpotifyPlayer player = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+
                     @Override
                     public void onInitialized(SpotifyPlayer spotifyPlayer) {
                         musicPlayer = spotifyPlayer;
@@ -75,20 +94,43 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
         }
     }
 
+    private void playPlaylistInOrder(final Player musicPlayer, int index) {
+        musicPlayer.playUri(null, "spotify:playlist:3pBnQakqa3Cd13p4qQP5Rn", index, 0);
+    }
+
+    private void playRandomSongFromPlaylist(final Player musicPlayer) {
+        new AsyncTask<Player, Void, Void>() {
+            @Override
+            protected Void doInBackground(Player... strings) {
+
+                List<PlaylistTrack> playlistTracks = spotifyApi.getService().getPlaylistTracks(playlistUserId, playlistId).items;
+                int randomTrackIndex = new Random().nextInt(playlistTracks.size());
+                playPlaylistInOrder(musicPlayer, randomTrackIndex);
+                return null;
+            }
+        }.execute(musicPlayer);
+    }
+
     @Override
     public void onLoggedIn() {
-        musicPlayer.playUri(null, "spotify:playlist:3pBnQakqa3Cd13p4qQP5Rn", 0, 0);
+        musicPlayer.setShuffle(null,true);
+            playRandomSongFromPlaylist(musicPlayer);
     }
 
     @Override
     public void onPlaybackEvent(PlayerEvent playerEvent) {
-        if(PlayerEvent.kSpPlaybackNotifyTrackChanged.equals(playerEvent)) {
+        if (PlayerEvent.kSpPlaybackNotifyTrackChanged.equals(playerEvent)) {
             updateTextToSongInformation();
         }
+
     }
 
     @Override
     public void onPlaybackError(Error error) {
+        if(error==Error.kSpErrorFailed) {
+            toastify("Error playing, perhaps we got to the end of the playlist. Trying another track.");
+            playRandomSongFromPlaylist(musicPlayer);
+        }
     }
 
     @Override
@@ -101,9 +143,39 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
 
     @Override
     public void onTemporaryError() {
+        System.out.println("SCOTTerror2");
     }
 
     @Override
     public void onConnectionMessage(String message) {
+    }
+
+}
+
+class SpotifyApiHelper {
+    public static void getPlaylistTracks(String accessToken) {
+//         try {
+//                    System.out.println("TRACKSSCOTT:"+SpotifyApiHelper.getPlaylistTracks(response.getAccessToken()).getItems()[0].getTrack().getName());
+//                } catch (IOException e) {
+//                    System.out.println("TRACKSSCOTT");
+//                    e.printStackTrace();
+//                } catch (SpotifyWebApiException e) {
+//                    System.out.println("TRACKSSCOTT");
+//                    e.printStackTrace();
+//                }
+//         SpotifyApi     spotifyApi=    new SpotifyApi.Builder()
+//                 .setAccessToken(accessToken)
+//                 .build();
+//         return spotifyApi.getPlaylistsTracks(SongPlayingActivity.CLIENT_ID, "3pBnQakqa3Cd13p4qQP5Rn").build().execute();};
+        SpotifyApi api = new SpotifyApi();
+//
+//// Most (but not all) of the Spotify Web API endpoints require authorisation.
+//// If you know you'll only use the ones that don't require authorisation you can skip this step
+//             api.setAccessToken("myAccessToken");
+//
+        SpotifyService spotify = api.getService();
+//
+
+        new SpotifyApi().getService().getPlaylistTracks(CLIENT_ID, "3pBnQakqa3Cd13p4qQP5Rn");
     }
 }

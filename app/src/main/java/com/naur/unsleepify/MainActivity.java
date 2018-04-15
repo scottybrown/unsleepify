@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -15,29 +16,25 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.w3c.dom.Text;
-
-import java.time.LocalDate;
 import java.util.Calendar;
 import java.util.Date;
 
-// back from main activity opens the other activity i think
-// show when the one alarm is set
-// should store a list of alarms rather than just sending broadcast receivers out into the ether. then show that list.
-// shuffle songs playing
-//√ todo get playlist, play songs
+// notif before and during alarm
 // todo some error handling, would like to know why it failed since i expect it to
-// todo sets volume
-// todo stops if minimized, but runs when locked
-// runs at a time
-// can get song name. though can always shazam it kek
 // lock screen notif
 // show art. pref for band and song off album.
-// configure the time or times using gui
 // configure playlist in gui
 // not spinners. pop up an input box
-// make time default to 8h from now
 // report how far away you set an alarm
+//√ show when the one alarm is set
+//√ if it gets the last song in the playlist it goes to the start but doesn't play. can test this setting index manually
+//√ todo sets volume
+//√ todo stops if minimized, but runs when locked
+//√ runs at a time
+//√ can get song name. though can always shazam it kek
+//√ configure the time or times using gui
+//√ make time default to 8h from now
+//√ todo get playlist, play songs
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
 
@@ -63,7 +60,7 @@ public class MainActivity extends Activity {
                 writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.getTimeInMillis());
 
                 showToastOfTimeDifference(alarmTime); // TODO
-                toastify("Alarm set for: "+alarmTime.get(Calendar.HOUR_OF_DAY)+":"+alarmTime.get(Calendar.MINUTE));
+                toastify("Alarm set for: " + alarmTime.get(Calendar.HOUR_OF_DAY) + ":" + alarmTime.get(Calendar.MINUTE));
                 updateExistingAlarmText();
 
                 updateAlarmVolumeText();// TODO better in some callback but simpler this way
@@ -71,14 +68,14 @@ public class MainActivity extends Activity {
         });
     }
 
-    private void showToastOfTimeDifference(Calendar alarmTime){
-        long timeDifferenceInMillis=alarmTime.getTimeInMillis()-new Date().getTime();
-        long timeDifferenceInMins=timeDifferenceInMillis/(60*1000);
-        long timeDifferenceInHours=timeDifferenceInMillis/(60*1000*60);
+    private void showToastOfTimeDifference(Calendar alarmTime) {
+        long timeDifferenceInMillis = alarmTime.getTimeInMillis() - new Date().getTime();
+        long timeDifferenceInMins = timeDifferenceInMillis / (60 * 1000);
+        long timeDifferenceInHours = timeDifferenceInMillis / (60 * 1000 * 60);
 //        long remainder=timeDifferenceInMins%timeDifferenceInHours;
-        long remainder2=timeDifferenceInMins-timeDifferenceInHours*60;
+        long remainder2 = timeDifferenceInMins - timeDifferenceInHours * 60;
         // the time and date it's using here isn't right.
-        System.out.println("SCOTT"+timeDifferenceInHours+1+":"+remainder2);
+        System.out.println("SCOTT" + timeDifferenceInHours + 1 + ":" + remainder2);
     }
 
     private void initializeNumberPickers() {
@@ -120,7 +117,7 @@ public class MainActivity extends Activity {
             eightHoursFromNow = eightHoursFromNow - 24;
         }
 
-        return getCalendar((int)eightHoursFromNow,Calendar.getInstance().get(Calendar.MINUTE));
+        return getCalendar((int) eightHoursFromNow, Calendar.getInstance().get(Calendar.MINUTE));
     }
 
     public static Calendar calculateAlarmTime() {
