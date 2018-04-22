@@ -35,8 +35,8 @@ public class DateUtils {
     }
 
     public static String getTimeDifferenceString(Calendar alarmTime) {
-        Calendar nowWithNoSeconds=Calendar.getInstance();
-        nowWithNoSeconds.set(Calendar.SECOND,0);
+        Calendar nowWithNoSeconds = Calendar.getInstance();
+        nowWithNoSeconds.set(Calendar.SECOND, 0);
         long timeDifferenceInMillis = alarmTime.getTimeInMillis() - nowWithNoSeconds.getTime().getTime();
         long timeDifferenceInMins = timeDifferenceInMillis / (60000);
         long timeDifferenceInHours = timeDifferenceInMins / 60;
@@ -45,7 +45,20 @@ public class DateUtils {
             minutesRemainder = 0;
             timeDifferenceInHours = timeDifferenceInHours + 1;
         }
-        return "Alarm set for " + timeDifferenceInHours + " hours, " + minutesRemainder + " minutes from now";
+
+        String pluralS = minutesRemainder==1?"":"s";
+        return "Alarm set for " + timeDifferenceInHours + " hours, " + minutesRemainder + " minute"+pluralS+" from now";
+    }
+
+    public static void adjustToTomorrowIfBeforeOrEqualCurrentTime(Calendar time) {
+        boolean isCurrentHour =
+                Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == time.get(Calendar.HOUR_OF_DAY);
+        boolean isCurrentMinute = Calendar.getInstance().get(Calendar.MINUTE) == time.get(Calendar.MINUTE);
+        boolean isCurrentTime = isCurrentHour && isCurrentMinute;
+
+        if (Calendar.getInstance().after(time) || isCurrentTime) {
+            time.add(Calendar.DATE, 1);
+        }
     }
 
     public static Calendar calculateAlarmTimeOnly() {

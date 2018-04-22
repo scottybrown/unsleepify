@@ -1,5 +1,6 @@
 package com.naur.unsleepify;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -7,7 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
@@ -17,18 +18,17 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import static com.naur.unsleepify.DateUtils.getCalendar;
 
-// button to cancel alarm
+//√ button to cancel alarm
 // notif before and during alarm
-// todo some error handling, would like to know why it failed since i expect it to
-// lock screen notif
 // show art. pref for band and song off album.
 // configure playlist in gui
+// todo some error handling, would like to know why it failed since i expect it to
 // not spinners. pop up an input box
-// report how far away you set an alarm
+// not sure it actually repeats every day. should test. without resetting it
+//√ report how far away you set an alarm
 //√ show when the one alarm is set
 //√ if it gets the last song in the playlist it goes to the start but doesn't play. can test this setting index manually
 //√ todo sets volume
@@ -38,9 +38,9 @@ import static com.naur.unsleepify.DateUtils.getCalendar;
 //√ configure the time or times using gui
 //√ make time default to 8h from now
 //√ todo get playlist, play songs
-// not sure it actually repeats every day. should test. without resetting it
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
+    public static final int DEFULT_SAVED_ALARM_IN_MILLIS = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,17 +51,11 @@ public class MainActivity extends Activity {
         updateAlarmVolumeText();
         updateExistingAlarmText();
 
-        Button submitButton = findViewById(R.id.SubmitButton);
-        submitButton.setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.SubmitButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Calendar alarmTime = getCalendar(getHourPicker().getValue(), getMinutePicker().getValue());
-                // TODO test this too
-                boolean same =
-                        Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == alarmTime.get(Calendar.HOUR_OF_DAY) && Calendar.getInstance().get(Calendar.MINUTE) == alarmTime.get(Calendar.MINUTE);
-                if (Calendar.getInstance().after(alarmTime) || same) {
-                    alarmTime.add(Calendar.DATE, 1);
-                }
+                DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(alarmTime);
 
                 setupRepeatingBroadcastReceiver(alarmTime);
                 writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.getTimeInMillis());
@@ -70,6 +64,17 @@ public class MainActivity extends Activity {
                 updateExistingAlarmText();
 
                 updateAlarmVolumeText();// TODO better in some callback to keep it up to date when the user changes it. but simpler this way
+            }
+        });
+
+        findViewById(R.id.CancelButton).setOnClickListener(new View.OnClickListener() {
+            @TargetApi(Build.VERSION_CODES.LOLLIPOP)
+            @Override
+            public void onClick(View v) {
+                cancelBroadcastReceiver();
+                writePreference(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM_IN_MILLIS);
+                toastify("Alarm cancelled");
+                updateExistingAlarmText();
             }
         });
     }
@@ -90,11 +95,12 @@ public class MainActivity extends Activity {
 
     private void updateExistingAlarmText() {
         TextView existingAlarmText = findViewById(R.id.ExistingAlarm);
-        long defaultValue = -1l;
-        long existingAlarmInMillis = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS, defaultValue);
-        if (existingAlarmInMillis != defaultValue) {
+        long existingAlarmInMillis = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM_IN_MILLIS);
+        if (existingAlarmInMillis != DEFULT_SAVED_ALARM_IN_MILLIS) {
             Calendar existingAlarm = getCalendar(existingAlarmInMillis);
             existingAlarmText.setText(existingAlarm.get(Calendar.HOUR_OF_DAY) + ":" + existingAlarm.get(Calendar.MINUTE));
+        } else {
+            existingAlarmText.setText("No alarm set...");
         }
     }
 
@@ -106,12 +112,20 @@ public class MainActivity extends Activity {
         alarmVolumeText.setText("Alarm volume: " + alarmVolume + "/" + alarmMaxVolume);
     }
 
-    public void setupRepeatingBroadcastReceiver(Calendar alarmTime) {
+    public PendingIntent setupBroadcastIntent() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this.getApplicationContext(), AlarmReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
+        return PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
+    }
 
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+    public void setupRepeatingBroadcastReceiver(Calendar alarmTime) {
+        AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, setupBroadcastIntent());
+    }
+
+    public void cancelBroadcastReceiver() {
+        AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(setupBroadcastIntent());
     }
 
     private void toastify(String text) {

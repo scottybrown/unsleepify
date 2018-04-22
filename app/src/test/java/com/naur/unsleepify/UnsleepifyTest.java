@@ -49,6 +49,37 @@ public class UnsleepifyTest {
     }
 
     private String buildExpectedTimeDifferenceString(int hour, int minute) {
-        return "Alarm set for " + hour + " hours, " + minute + " minutes from now";
+        String pluralS = minute == 1 ? "s" : "";
+        return "Alarm set for " + hour + " hours, " + minute + " minute" + pluralS + " from now";
+    }
+
+    @Test
+    public void adjustToTomorrowIfBeforeOrEqualCurrentTime() {
+        Calendar timeToTest = Calendar.getInstance();
+        adjustAndAssertIsTomorrow(timeToTest, true);
+        timeToTest.add(Calendar.MINUTE, -1);
+        adjustAndAssertIsTomorrow(timeToTest, true);
+        timeToTest.add(Calendar.HOUR, -1);
+        adjustAndAssertIsTomorrow(timeToTest, true);
+
+        timeToTest = Calendar.getInstance();
+        timeToTest.add(Calendar.MINUTE, 1);
+        adjustAndAssertIsTomorrow(timeToTest, false);
+        timeToTest.add(Calendar.HOUR, 1);
+        adjustAndAssertIsTomorrow(timeToTest, false);
+    }
+
+    public void adjustAndAssertIsTomorrow(Calendar calendar, boolean isTomorrow) {
+        Calendar originalCalendar = Calendar.getInstance();
+        originalCalendar.setTimeInMillis(calendar.getTimeInMillis());
+        DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(calendar);
+        assertEquals(calendar.get(Calendar.HOUR_OF_DAY), originalCalendar.get(Calendar.HOUR_OF_DAY));
+        assertEquals(calendar.get(Calendar.MINUTE), originalCalendar.get(Calendar.MINUTE));
+        assertEquals(calendar.get(Calendar.SECOND), Calendar.getInstance().get(Calendar.SECOND));
+        assertEquals(calendar.get(Calendar.YEAR), Calendar.getInstance().get(Calendar.YEAR));
+        assertEquals(calendar.get(Calendar.MONTH), Calendar.getInstance().get(Calendar.MONTH));
+        Calendar dayCalendar = Calendar.getInstance();
+        dayCalendar.add(Calendar.DAY_OF_MONTH, isTomorrow ? 1 : 0);
+        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), dayCalendar.get(Calendar.DAY_OF_MONTH));
     }
 }
