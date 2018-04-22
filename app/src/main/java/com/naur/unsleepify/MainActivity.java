@@ -19,6 +19,9 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.Date;
 
+import static com.naur.unsleepify.DateUtils.getCalendar;
+
+// button to cancel alarm
 // notif before and during alarm
 // todo some error handling, would like to know why it failed since i expect it to
 // lock screen notif
@@ -35,6 +38,7 @@ import java.util.Date;
 //√ configure the time or times using gui
 //√ make time default to 8h from now
 //√ todo get playlist, play songs
+// not sure it actually repeats every day. should test. without resetting it
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
 
@@ -52,30 +56,22 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Calendar alarmTime = getCalendar(getHourPicker().getValue(), getMinutePicker().getValue());
-                if (Calendar.getInstance().after(alarmTime)) {
+                // TODO test this too
+                boolean same =
+                        Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == alarmTime.get(Calendar.HOUR_OF_DAY) && Calendar.getInstance().get(Calendar.MINUTE) == alarmTime.get(Calendar.MINUTE);
+                if (Calendar.getInstance().after(alarmTime) || same) {
                     alarmTime.add(Calendar.DATE, 1);
                 }
 
                 setupRepeatingBroadcastReceiver(alarmTime);
                 writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.getTimeInMillis());
 
-                showToastOfTimeDifference(alarmTime); // TODO
-                toastify("Alarm set for: " + alarmTime.get(Calendar.HOUR_OF_DAY) + ":" + alarmTime.get(Calendar.MINUTE));
+                toastify(DateUtils.getTimeDifferenceString(alarmTime));
                 updateExistingAlarmText();
 
-                updateAlarmVolumeText();// TODO better in some callback but simpler this way
+                updateAlarmVolumeText();// TODO better in some callback to keep it up to date when the user changes it. but simpler this way
             }
         });
-    }
-
-    private void showToastOfTimeDifference(Calendar alarmTime) {
-        long timeDifferenceInMillis = alarmTime.getTimeInMillis() - new Date().getTime();
-        long timeDifferenceInMins = timeDifferenceInMillis / (60 * 1000);
-        long timeDifferenceInHours = timeDifferenceInMillis / (60 * 1000 * 60);
-//        long remainder=timeDifferenceInMins%timeDifferenceInHours;
-        long remainder2 = timeDifferenceInMins - timeDifferenceInHours * 60;
-        // the time and date it's using here isn't right.
-        System.out.println("SCOTT" + timeDifferenceInHours + 1 + ":" + remainder2);
     }
 
     private void initializeNumberPickers() {
@@ -87,7 +83,7 @@ public class MainActivity extends Activity {
         minutePicker.setMinValue(0);
         minutePicker.setMaxValue(59);
 
-        Calendar defaultTime = calculateAlarmTime();
+        Calendar defaultTime = DateUtils.calculateAlarmTimeOnly();
         hourPicker.setValue(defaultTime.get(Calendar.HOUR_OF_DAY));
         minutePicker.setValue(defaultTime.get(Calendar.MINUTE));
     }
@@ -110,22 +106,6 @@ public class MainActivity extends Activity {
         alarmVolumeText.setText("Alarm volume: " + alarmVolume + "/" + alarmMaxVolume);
     }
 
-    public static Calendar getEightHoursFromNow() {
-        long eightHoursFromNow = Calendar.getInstance().get(Calendar.HOUR_OF_DAY) + 8;
-
-        if (eightHoursFromNow > 23) {
-            eightHoursFromNow = eightHoursFromNow - 24;
-        }
-
-        return getCalendar((int) eightHoursFromNow, Calendar.getInstance().get(Calendar.MINUTE));
-    }
-
-    public static Calendar calculateAlarmTime() {
-        Calendar time = getEightHoursFromNow();
-        time.set(Calendar.SECOND, 0);
-        return time;
-    }
-
     public void setupRepeatingBroadcastReceiver(Calendar alarmTime) {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this.getApplicationContext(), AlarmReceiver.class);
@@ -142,19 +122,6 @@ public class MainActivity extends Activity {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
         editor.putLong(preferenceKey, preference);
         editor.apply();
-    }
-
-    public static Calendar getCalendar(int hour, int minute) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, minute);
-        return cal;
-    }
-
-    private Calendar getCalendar(long existingAlarmInMillis) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(existingAlarmInMillis);
-        return calendar;
     }
 
     private NumberPicker getHourPicker() {
