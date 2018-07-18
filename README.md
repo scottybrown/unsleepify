@@ -1,8 +1,9 @@
-=Unsleepify
+# Unsleepify
 An alarm app without alarms. Just cool beats and nice melodies to rock you out of your slumber.
+
 Uses Spotify, who have a history of banning such use of their API. This is not for app stores - this is for me and mine.
 
-== TODO
+## TODO
 - Notification before and during alarm for easy access, no surprises, good experience
 - Show art for song being played - either in notification like Spotify, or whole background
 - Configure a playlist in GUI rather than a hardcoded list
@@ -11,7 +12,7 @@ Uses Spotify, who have a history of banning such use of their API. This is not f
 - Properly format time of currently set alarm
 - Alarm uses alarm volume not main volume
 
-== Accomplished TODOs
+## Accomplished TODOs
 - A button to disable alarm
 - When an alarm is set, report how long until it occurs. So that user is aware if they accidentally set it for 2hr from now
 - Show time of currently set alarm
