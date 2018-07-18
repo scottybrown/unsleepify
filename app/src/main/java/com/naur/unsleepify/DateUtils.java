@@ -1,23 +1,6 @@
 package com.naur.unsleepify;
 
-import android.app.Activity;
-import android.app.AlarmManager;
-import android.app.PendingIntent;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.os.Bundle;
-import android.preference.PreferenceManager;
-import android.view.View;
-import android.widget.Button;
-import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import java.time.LocalTime;
 import java.util.Calendar;
-import java.util.Date;
 
 public class DateUtils {
     public static Calendar getTimeEightHoursFromNow() {
@@ -46,8 +29,8 @@ public class DateUtils {
             timeDifferenceInHours = timeDifferenceInHours + 1;
         }
 
-        String pluralS = minutesRemainder==1?"":"s";
-        return "Alarm set for " + timeDifferenceInHours + " hours, " + minutesRemainder + " minute"+pluralS+" from now";
+        String pluralString = minutesRemainder == 1 ? "" : "s";
+        return "Alarm set for " + timeDifferenceInHours + " hours, " + minutesRemainder + " minute" + pluralString + " from now";
     }
 
     public static void adjustToTomorrowIfBeforeOrEqualCurrentTime(Calendar time) {

@@ -12,7 +12,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.widget.Button;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,23 +20,6 @@ import java.util.Calendar;
 
 import static com.naur.unsleepify.DateUtils.getCalendar;
 
-//√ button to cancel alarm
-// notif before and during alarm
-// show art. pref for band and song off album.
-// configure playlist in gui
-// todo some error handling, would like to know why it failed since i expect it to
-// not spinners. pop up an input box
-// not sure it actually repeats every day. should test. without resetting it
-//√ report how far away you set an alarm
-//√ show when the one alarm is set
-//√ if it gets the last song in the playlist it goes to the start but doesn't play. can test this setting index manually
-//√ todo sets volume
-//√ todo stops if minimized, but runs when locked
-//√ runs at a time
-//√ can get song name. though can always shazam it kek
-//√ configure the time or times using gui
-//√ make time default to 8h from now
-//√ todo get playlist, play songs
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
     public static final int DEFULT_SAVED_ALARM_IN_MILLIS = -1;
