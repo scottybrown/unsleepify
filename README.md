@@ -4,13 +4,15 @@ An alarm app without alarms. Just cool beats and nice melodies to rock you out o
 Uses Spotify, who have a history of banning such use of their API. This is not for app stores - this is for me and mine.
 
 ## TODO
+- Alarm uses alarm volume not main volume
+- Properly format time of currently set alarm
+- My spinners to select time are cool, but an input box would be nicer
+- icon
 - Notification before and during alarm for easy access, no surprises, good experience
 - Show art for song being played - either in notification like Spotify, or whole background
 - Configure a playlist in GUI rather than a hardcoded list
 - Error handling - hitting Spotify API can bring all sorts of issues - I'd like those to at least be debuggable
-- My spinners to select time are cool, but an input box would be nicer
-- Properly format time of currently set alarm
-- Alarm uses alarm volume not main volume
+- more tests
 
 ## Accomplished TODOs
 - A button to disable alarm
