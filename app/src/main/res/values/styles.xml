@@ -1,8 +1,12 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="android:Theme.Holo.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="AppTheme" parent="android:Theme.Holo.NoActionBar">
+    </style>
+
+    <style name="BackGroundImageView">
+        <item name="android:alpha">0.9</item>
+        <item name="android:scaleType">centerCrop</item>
+        <item name="android:src">@drawable/background4</item>
     </style>
 
 </resources>

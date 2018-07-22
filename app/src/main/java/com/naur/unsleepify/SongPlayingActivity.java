@@ -2,6 +2,7 @@ package com.naur.unsleepify;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -34,7 +35,7 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     private static final int REQUEST_CODE = 1337;
     private TextView view;
     private SpotifyApi spotifyApi = new SpotifyApi();
-    private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";
+    private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";// todo shouldn't be here
     private String playlistUserId = "soundrop";
 
     @Override
@@ -47,6 +48,8 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
         builder.setScopes(new String[]{"user-read-private", "streaming"});
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+
+        setVolumeControlStream(AudioManager.STREAM_ALARM);
     }
 
     @Override
@@ -75,6 +78,7 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     }
 
     private void toastify(String text) {
+        // todo don't duplicate
         Toast.makeText(this.getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
 
@@ -109,8 +113,8 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
 
     @Override
     public void onLoggedIn() {
-        musicPlayer.setShuffle(null,true);
-            playRandomSongFromPlaylist(musicPlayer);
+        musicPlayer.setShuffle(null, true);
+        playRandomSongFromPlaylist(musicPlayer);
     }
 
     @Override
@@ -123,7 +127,7 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
 
     @Override
     public void onPlaybackError(Error error) {
-        if(error==Error.kSpErrorFailed) {
+        if (error == Error.kSpErrorFailed) {
             toastify("Error playing, perhaps we got to the end of the playlist. Trying another track.");
             playRandomSongFromPlaylist(musicPlayer);
         }
@@ -138,40 +142,10 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     }
 
     @Override
-    public void onTemporaryError() {
-        System.out.println("SCOTTerror2");
-    }
+    public void onTemporaryError() {}
 
     @Override
     public void onConnectionMessage(String message) {
     }
 
-}
-
-class SpotifyApiHelper {
-    public static void getPlaylistTracks(String accessToken) {
-//         try {
-//                    System.out.println("TRACKSSCOTT:"+SpotifyApiHelper.getPlaylistTracks(response.getAccessToken()).getItems()[0].getTrack().getName());
-//                } catch (IOException e) {
-//                    System.out.println("TRACKSSCOTT");
-//                    e.printStackTrace();
-//                } catch (SpotifyWebApiException e) {
-//                    System.out.println("TRACKSSCOTT");
-//                    e.printStackTrace();
-//                }
-//         SpotifyApi     spotifyApi=    new SpotifyApi.Builder()
-//                 .setAccessToken(accessToken)
-//                 .build();
-//         return spotifyApi.getPlaylistsTracks(SongPlayingActivity.CLIENT_ID, "3pBnQakqa3Cd13p4qQP5Rn").build().execute();};
-        SpotifyApi api = new SpotifyApi();
-//
-//// Most (but not all) of the Spotify Web API endpoints require authorisation.
-//// If you know you'll only use the ones that don't require authorisation you can skip this step
-//             api.setAccessToken("myAccessToken");
-//
-        SpotifyService spotify = api.getService();
-//
-
-        new SpotifyApi().getService().getPlaylistTracks(CLIENT_ID, "3pBnQakqa3Cd13p4qQP5Rn");
-    }
 }

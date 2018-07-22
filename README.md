@@ -5,9 +5,11 @@ Uses Spotify, who have a history of banning such use of their API. This is not f
 
 ## TODO
 - Alarm uses alarm volume not main volume
+- todos in code
+- skip song
+- make set and unset the same button
 - Properly format time of currently set alarm
 - My spinners to select time are cool, but an input box would be nicer
-- icon
 - Notification before and during alarm for easy access, no surprises, good experience
 - Show art for song being played - either in notification like Spotify, or whole background
 - Configure a playlist in GUI rather than a hardcoded list
@@ -15,6 +17,7 @@ Uses Spotify, who have a history of banning such use of their API. This is not f
 - more tests
 
 ## Accomplished TODOs
+- icon
 - A button to disable alarm
 - When an alarm is set, report how long until it occurs. So that user is aware if they accidentally set it for 2hr from now
 - Show time of currently set alarm
