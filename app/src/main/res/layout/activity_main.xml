@@ -46,7 +46,22 @@
                 android:id="@+id/SubmitButton"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="80dp"
+                android:paddingVertical="20dp"
                 android:text="Make alarm yo" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/CancelButton"
+                android:layout_width="fill_parent"
+                android:layout_marginHorizontal="80dp"
+                android:paddingVertical="20dp"
+                android:layout_height="wrap_content"
+                android:text="Unset alarm" />
         </LinearLayout>
 
         <LinearLayout
@@ -76,16 +91,7 @@
                 />
         </LinearLayout>
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
 
-            <Button
-                android:id="@+id/CancelButton"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:text="Unset alarm" />
-        </LinearLayout>
 
     </LinearLayout>
 </RelativeLayout>
