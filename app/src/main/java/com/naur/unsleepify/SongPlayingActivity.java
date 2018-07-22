@@ -48,8 +48,6 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
         builder.setScopes(new String[]{"user-read-private", "streaming"});
         AuthenticationRequest request = builder.build();
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-
-        setVolumeControlStream(AudioManager.STREAM_ALARM);
     }
 
     @Override

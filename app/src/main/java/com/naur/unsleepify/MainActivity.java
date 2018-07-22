@@ -34,6 +34,7 @@ public class MainActivity extends Activity {
         initializeNumberPickers();
         updateAlarmVolumeText();
         updateExistingAlarmText();
+        setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         findViewById(R.id.SubmitButton).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -91,11 +92,13 @@ public class MainActivity extends Activity {
     private void updateAlarmVolumeText() {
         TextView alarmVolumeText = findViewById(R.id.AlarmVolume);
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        int alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM);
-        int alarmMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM);
-        alarmVolumeText.setText("Alarm volume: " + alarmVolume + "/" + alarmMaxVolume);
+        int alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        int alarmMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        alarmVolumeText.setText("Alarm volume: " +percentageOf(alarmVolume,alarmMaxVolume)+"%");
     }
-
+private int percentageOf(int number, int max){
+    return (number * 100) / max;
+}
     public PendingIntent setupBroadcastIntent() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this.getApplicationContext(), AlarmReceiver.class);
