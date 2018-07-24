@@ -2,11 +2,9 @@ package com.naur.unsleepify;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.spotify.sdk.android.authentication.AuthenticationClient;
 import com.spotify.sdk.android.authentication.AuthenticationRequest;
@@ -23,10 +21,7 @@ import java.util.List;
 import java.util.Random;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.PlaylistTrack;
-
-import static com.naur.unsleepify.SongPlayingActivity.CLIENT_ID;
 
 public class SongPlayingActivity extends Activity implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback {
     public static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
@@ -75,11 +70,6 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
         }
     }
 
-    private void toastify(String text) {
-        // todo don't duplicate
-        Toast.makeText(this.getApplicationContext(), text, Toast.LENGTH_SHORT).show();
-    }
-
     @Override
     protected void onDestroy() {
         Spotify.destroyPlayer(this);
@@ -126,9 +116,11 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     @Override
     public void onPlaybackError(Error error) {
         if (error == Error.kSpErrorFailed) {
-            toastify("Error playing, perhaps we got to the end of the playlist. Trying another track.");
-            playRandomSongFromPlaylist(musicPlayer);
+            Utils.toastify("Error playing, perhaps we got to the end of the playlist. Trying another track.", this);
+        } else {
+            Utils.toastify("Error playing, retrying. Details: "+error.name()+": "+error.toString(), this);
         }
+        playRandomSongFromPlaylist(musicPlayer);
     }
 
     @Override
@@ -140,10 +132,10 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     }
 
     @Override
-    public void onTemporaryError() {}
+    public void onTemporaryError() {
+    }
 
     @Override
     public void onConnectionMessage(String message) {
     }
-
 }

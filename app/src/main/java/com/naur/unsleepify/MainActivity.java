@@ -45,7 +45,7 @@ public class MainActivity extends Activity {
                 setupRepeatingBroadcastReceiver(alarmTime);
                 writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.getTimeInMillis());
 
-                toastify(DateUtils.getTimeDifferenceString(alarmTime));
+                Utils.toastify(DateUtils.getTimeDifferenceString(alarmTime), getApplicationContext());
                 updateExistingAlarmText();
 
                 updateAlarmVolumeText();// TODO better in some callback to keep it up to date when the user changes it. but simpler this way
@@ -58,7 +58,7 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
                 cancelBroadcastReceiver();
                 writePreference(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM_IN_MILLIS);
-                toastify("Alarm cancelled");
+                Utils.toastify("Alarm cancelled", getApplicationContext());
                 updateExistingAlarmText();
             }
         });
@@ -94,11 +94,13 @@ public class MainActivity extends Activity {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         int alarmMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        alarmVolumeText.setText("Alarm volume: " +percentageOf(alarmVolume,alarmMaxVolume)+"%");
+        alarmVolumeText.setText("Alarm volume: " + percentageOf(alarmVolume, alarmMaxVolume) + "%");
     }
-private int percentageOf(int number, int max){
-    return (number * 100) / max;
-}
+
+    private int percentageOf(int number, int max) {
+        return (number * 100) / max;
+    }
+
     public PendingIntent setupBroadcastIntent() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this.getApplicationContext(), AlarmReceiver.class);
@@ -113,10 +115,6 @@ private int percentageOf(int number, int max){
     public void cancelBroadcastReceiver() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(setupBroadcastIntent());
-    }
-
-    private void toastify(String text) {
-        Toast.makeText(this.getApplicationContext(), text, Toast.LENGTH_SHORT).show();
     }
 
     private void writePreference(String preferenceKey, long preference) {
