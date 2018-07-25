@@ -13,19 +13,18 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
-import android.view.Window;
 import android.widget.NumberPicker;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
-import static com.naur.unsleepify.DateUtils.getCalendar;
+import static com.naur.unsleepify.DateUtils.getTime;
 import static com.naur.unsleepify.DateUtils.getTimeEightHoursFromNow;
 
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
-    public static final int DEFULT_SAVED_ALARM_IN_MILLIS = -1;
+    public static final int DEFULT_SAVED_ALARM = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +39,14 @@ public class MainActivity extends Activity {
         findViewById(R.id.SubmitButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Calendar alarmTime = getCalendar(getHourPicker().getValue(), getMinutePicker().getValue());
-                DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(alarmTime);
-
-                setupRepeatingBroadcastReceiver(alarmTime);
-                writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.getTimeInMillis());
-
-                Utils.toastify(DateUtils.getTimeDifferenceString(alarmTime), getApplicationContext());
+                LocalTime alarmTime = getTime(getHourPicker().getValue(), getMinutePicker().getValue());
+                writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.toSecondOfDay());
                 updateExistingAlarmText();
+
+                LocalDateTime alarmDateTime = DateUtils.getLocalDateTime(alarmTime);
+                alarmDateTime = DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(alarmDateTime);
+                setupRepeatingBroadcastReceiver(alarmDateTime);
+                Utils.toastify(DateUtils.getTimeDifferenceString(alarmDateTime), getApplicationContext());
 
                 updateAlarmVolumeText();// TODO better in some callback to keep it up to date when the user changes it. but simpler this way
             }
@@ -58,7 +57,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 cancelBroadcastReceiver();
-                writePreference(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM_IN_MILLIS);
+                writePreference(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM);
                 Utils.toastify("Alarm cancelled", getApplicationContext());
                 updateExistingAlarmText();
             }
@@ -74,17 +73,17 @@ public class MainActivity extends Activity {
         minutePicker.setMinValue(0);
         minutePicker.setMaxValue(59);
 
-        Calendar defaultTime = getTimeEightHoursFromNow();
-        hourPicker.setValue(defaultTime.get(Calendar.HOUR_OF_DAY));
-        minutePicker.setValue(defaultTime.get(Calendar.MINUTE));
+        LocalTime defaultTime = getTimeEightHoursFromNow();
+        hourPicker.setValue(defaultTime.getHour());
+        minutePicker.setValue(defaultTime.getMinute());
     }
 
     private void updateExistingAlarmText() {
         TextView existingAlarmText = findViewById(R.id.ExistingAlarm);
-        long existingAlarmInMillis = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM_IN_MILLIS);
-        if (existingAlarmInMillis != DEFULT_SAVED_ALARM_IN_MILLIS) {
-            Calendar existingAlarm = getCalendar(existingAlarmInMillis);
-            existingAlarmText.setText(existingAlarm.get(Calendar.HOUR_OF_DAY) + ":" + existingAlarm.get(Calendar.MINUTE));
+        long existingAlarmLong = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM);
+        if (existingAlarmLong != DEFULT_SAVED_ALARM) {
+            LocalTime existingAlarm = getTime(existingAlarmLong);
+            existingAlarmText.setText(existingAlarm.getHour() + ":" + existingAlarm.getMinute());
         } else {
             existingAlarmText.setText("No alarm set...");
         }
@@ -107,9 +106,9 @@ public class MainActivity extends Activity {
         return PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
     }
 
-    public void setupRepeatingBroadcastReceiver(Calendar alarmTime) {
+    public void setupRepeatingBroadcastReceiver(LocalDateTime dateTime) {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, alarmTime.getTimeInMillis(), AlarmManager.INTERVAL_DAY, setupBroadcastIntent());
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, DateUtils.getMillis(dateTime), AlarmManager.INTERVAL_DAY, setupBroadcastIntent());
     }
 
     public void cancelBroadcastReceiver() {

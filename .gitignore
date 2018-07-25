@@ -1,3 +1,4 @@
+/app/libs
 *.iml
 .gradle
 /local.properties

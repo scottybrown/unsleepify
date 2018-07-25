@@ -2,6 +2,8 @@ package com.naur.unsleepify;
 
 import org.junit.Test;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -11,40 +13,40 @@ public class UnsleepifyTest {
     // todo don't use calendar. use jodatime. or...android equiv? given it's somewhere past java 6
     @Test
     public void canSkipAheadEightHours() {
-        assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(0, 0), 8, 0);
-        assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(15, 10), 23, 10);
-        assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(16, 35), 0, 35);
-        assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(17, 0), 1, 0);
-        assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(20, 0), 4, 0);
+        assertLocalTimeIsTime(DateUtils.getTimeEightHoursFromTime(0, 0), 8, 0);
+        assertLocalTimeIsTime(DateUtils.getTimeEightHoursFromTime(15, 10), 23, 10);
+        assertLocalTimeIsTime(DateUtils.getTimeEightHoursFromTime(16, 35), 0, 35);
+        assertLocalTimeIsTime(DateUtils.getTimeEightHoursFromTime(17, 0), 1, 0);
+        assertLocalTimeIsTime(DateUtils.getTimeEightHoursFromTime(20, 0), 4, 0);
     }
 
-    private void assertCalendarIsTime(Calendar calendar, int hour, int minute) {
-        assertEquals(calendar.get(Calendar.HOUR_OF_DAY), hour);
-        assertEquals(calendar.get(Calendar.MINUTE), minute);
-        assertEquals(calendar.get(Calendar.SECOND),0);
+    private void assertLocalTimeIsTime(LocalTime time, int hour, int minute) {
+        assertEquals(time.getHour(), hour);
+        assertEquals(time.getMinute(), minute);
+        assertEquals(time.getSecond(), 0);
     }
 
     @Test
     public void getTimeDifferenceString() {
-        Calendar timeToTest = Calendar.getInstance();
+        LocalDateTime timeToTest = LocalDateTime.now();
         assertEquals(buildExpectedTimeDifferenceString(0, 0), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 1);
+        timeToTest = timeToTest.plusMinutes(1);
         assertEquals(buildExpectedTimeDifferenceString(0, 1), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 9);
+        timeToTest = timeToTest.plusMinutes(9);
         assertEquals(buildExpectedTimeDifferenceString(0, 10), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 48);
+        timeToTest = timeToTest.plusMinutes(48);
         assertEquals(buildExpectedTimeDifferenceString(0, 58), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 1);
+        timeToTest = timeToTest.plusMinutes(1);
         assertEquals(buildExpectedTimeDifferenceString(0, 59), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 1);
+        timeToTest = timeToTest.plusMinutes(1);
         assertEquals(buildExpectedTimeDifferenceString(1, 0), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 59);
+        timeToTest = timeToTest.plusMinutes(59);
         assertEquals(buildExpectedTimeDifferenceString(1, 59), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 1);
+        timeToTest = timeToTest.plusMinutes(1);
         assertEquals(buildExpectedTimeDifferenceString(2, 0), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.HOUR, 21);
+        timeToTest = timeToTest.plusHours(21);
         assertEquals(buildExpectedTimeDifferenceString(23, 0), DateUtils.getTimeDifferenceString(timeToTest));
-        timeToTest.add(Calendar.MINUTE, 59);
+        timeToTest = timeToTest.plusMinutes(59);
         assertEquals(buildExpectedTimeDifferenceString(23, 59), DateUtils.getTimeDifferenceString(timeToTest));
     }
 
@@ -55,43 +57,45 @@ public class UnsleepifyTest {
 
     @Test
     public void adjustToTomorrowIfBeforeOrEqualCurrentTime() {
-        Calendar timeToTest = Calendar.getInstance();
+        LocalDateTime timeToTest = LocalDateTime.now();
         adjustAndAssertIsTomorrow(timeToTest, true);
-        timeToTest.add(Calendar.MINUTE, -1);
+        timeToTest = timeToTest.plusMinutes(-1);
         adjustAndAssertIsTomorrow(timeToTest, true);
-        timeToTest.add(Calendar.HOUR, -1);
+        timeToTest = timeToTest.plusHours(-1);
         adjustAndAssertIsTomorrow(timeToTest, true);
 
-        timeToTest = Calendar.getInstance();
-        timeToTest.add(Calendar.MINUTE, 1);
+        timeToTest = LocalDateTime.now();
+        timeToTest = timeToTest.plusMinutes(1);
         adjustAndAssertIsTomorrow(timeToTest, false);
-        timeToTest.add(Calendar.HOUR, 1);
+        timeToTest = timeToTest.plusHours(1);
         adjustAndAssertIsTomorrow(timeToTest, false);
     }
 
-    public void adjustAndAssertIsTomorrow(Calendar calendar, boolean isTomorrow) {
-        Calendar originalCalendar = Calendar.getInstance();
-        originalCalendar.setTimeInMillis(calendar.getTimeInMillis());
-        DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(calendar);
-        assertEquals(calendar.get(Calendar.HOUR_OF_DAY), originalCalendar.get(Calendar.HOUR_OF_DAY));
-        assertEquals(calendar.get(Calendar.MINUTE), originalCalendar.get(Calendar.MINUTE));
-        assertEquals(calendar.get(Calendar.SECOND), Calendar.getInstance().get(Calendar.SECOND));
-        assertEquals(calendar.get(Calendar.YEAR), Calendar.getInstance().get(Calendar.YEAR));
-        assertEquals(calendar.get(Calendar.MONTH), Calendar.getInstance().get(Calendar.MONTH));
-        Calendar dayCalendar = Calendar.getInstance();
-        dayCalendar.add(Calendar.DAY_OF_MONTH, isTomorrow ? 1 : 0);
-        assertEquals(calendar.get(Calendar.DAY_OF_MONTH), dayCalendar.get(Calendar.DAY_OF_MONTH));
+    public void adjustAndAssertIsTomorrow(LocalDateTime calendar, boolean isTomorrow) {
+        LocalDateTime originalCalendar = LocalDateTime.of(calendar.toLocalDate(), calendar.toLocalTime());
+
+        calendar=DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(calendar);
+        assertEquals(calendar.getHour(), originalCalendar.getHour());
+        assertEquals(calendar.getMinute(), originalCalendar.getMinute());
+        assertEquals(calendar.getSecond(), LocalDateTime.now().getSecond());
+        assertEquals(calendar.getYear(), LocalDateTime.now().getYear());
+        assertEquals(calendar.getMonth(), LocalDateTime.now().getMonth());
+
+        LocalDateTime dayCalendar = LocalDateTime.now();
+        dayCalendar = dayCalendar.plusDays(isTomorrow ? 1 : 0);
+        assertEquals(dayCalendar.getDayOfMonth(),calendar.getDayOfMonth());
     }
 
     @Test
     public void getCalendarHourAndMinute() {
-        assertCalendarIsTime(DateUtils.getCalendar(0, 0), 0, 0);
-        assertCalendarIsTime(DateUtils.getCalendar(5, 10), 5, 10);
-        assertCalendarIsTime(DateUtils.getCalendar(23, 59), 23, 59);
+        assertLocalTimeIsTime(DateUtils.getTime(0, 0), 0, 0);
+        assertLocalTimeIsTime(DateUtils.getTime(5, 10), 5, 10);
+        assertLocalTimeIsTime(DateUtils.getTime(23, 59), 23, 59);
     }
 
     @Test
     public void getCalendarMillis() {
-        assertEquals(123456,DateUtils.getCalendar(123456).getTimeInMillis());
+        assertEquals(12345, DateUtils.getTime(12345).toSecondOfDay());
     }
-    }
+}
+// todo eradicate the word calendar

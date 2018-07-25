@@ -1,26 +1,32 @@
 package com.naur.unsleepify;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 
 public class DateUtils {
-    public static Calendar getTimeEightHoursFromNow() {
-        return getTimeEightHoursFromTime(Calendar.getInstance().get(Calendar.HOUR_OF_DAY), Calendar.getInstance().get(Calendar.MINUTE));
+    public static LocalTime getTimeEightHoursFromNow() {
+        return getTimeEightHoursFromTime(LocalTime.now().getHour(), LocalTime.now().getMinute());
     }
 
-    public static Calendar getTimeEightHoursFromTime(int hour, int minute) {
+    public static LocalTime getTimeEightHoursFromTime(int hour, int minute) {
         long eightHoursFromNow = hour + 8;
 
         if (eightHoursFromNow > 23) {
             eightHoursFromNow = eightHoursFromNow - 24;
         }
 
-        return getCalendar((int) eightHoursFromNow, minute);
+        return getTime((int) eightHoursFromNow, minute);
     }
 
-    public static String getTimeDifferenceString(Calendar alarmTime) {
+    public static String getTimeDifferenceString(LocalDateTime dateTime) {
+        //todo
         Calendar nowWithNoSeconds = Calendar.getInstance();
         nowWithNoSeconds.set(Calendar.SECOND, 0);
-        long timeDifferenceInMillis = alarmTime.getTimeInMillis() - nowWithNoSeconds.getTime().getTime();
+        long timeDifferenceInMillis = DateUtils.getMillis(dateTime) - nowWithNoSeconds.getTime().getTime();
         long timeDifferenceInMins = timeDifferenceInMillis / (60000);
         long timeDifferenceInHours = timeDifferenceInMins / 60;
         long minutesRemainder = timeDifferenceInMins % 60;
@@ -33,28 +39,34 @@ public class DateUtils {
         return "Alarm set for " + timeDifferenceInHours + " hours, " + minutesRemainder + " minute" + pluralString + " from now";
     }
 
-    public static void adjustToTomorrowIfBeforeOrEqualCurrentTime(Calendar time) {
+    public static long getMillis(LocalDateTime dateTime) {
+        return dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
+
+    public static LocalDateTime adjustToTomorrowIfBeforeOrEqualCurrentTime(LocalDateTime dateTime) {
         boolean isCurrentHour =
-                Calendar.getInstance().get(Calendar.HOUR_OF_DAY) == time.get(Calendar.HOUR_OF_DAY);
-        boolean isCurrentMinute = Calendar.getInstance().get(Calendar.MINUTE) == time.get(Calendar.MINUTE);
+                LocalTime.now().getHour() == dateTime.getHour();
+        boolean isCurrentMinute = LocalTime.now().getMinute() == dateTime.getMinute();
         boolean isCurrentTime = isCurrentHour && isCurrentMinute;
-
-        if (Calendar.getInstance().after(time) || isCurrentTime) {
-            time.add(Calendar.DATE, 1);
+// todo might be a localtimey way to do this
+        if (LocalDateTime.now().isAfter(dateTime) || isCurrentTime) {
+            dateTime = dateTime.plusDays(1);
         }
+        return dateTime;
     }
 
-    public static Calendar getCalendar(int hour, int minute) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, minute);
-        cal.set(Calendar.SECOND, 0);
-        return cal;
+    public static LocalTime getTime(int hour, int minute) {
+        return LocalTime.of(hour, minute);
     }
 
-    public static Calendar getCalendar(long existingAlarmInMillis) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(existingAlarmInMillis);
-        return calendar;
+    public static LocalTime getTime(long secondOfDay) {
+        return LocalTime.ofSecondOfDay(secondOfDay);
+    }
+
+    public static LocalDateTime getLocalDateTime(LocalTime alarmTime) {
+        LocalDateTime dateTime = LocalDateTime.now();
+        dateTime=dateTime.withHour(alarmTime.getHour());
+        dateTime=dateTime.withMinute(alarmTime.getMinute());
+        return dateTime;
     }
 }
