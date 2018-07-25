@@ -4,13 +4,9 @@ import org.junit.Test;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
-
 import static org.junit.Assert.*;
 
 public class UnsleepifyTest {
-    // todo don't use calendar. use jodatime. or...android equiv? given it's somewhere past java 6
     @Test
     public void canSkipAheadEightHours() {
         assertLocalTimeIsTime(DateUtils.getTimeEightHoursFromTime(0, 0), 8, 0);
@@ -71,31 +67,30 @@ public class UnsleepifyTest {
         adjustAndAssertIsTomorrow(timeToTest, false);
     }
 
-    public void adjustAndAssertIsTomorrow(LocalDateTime calendar, boolean isTomorrow) {
-        LocalDateTime originalCalendar = LocalDateTime.of(calendar.toLocalDate(), calendar.toLocalTime());
+    public void adjustAndAssertIsTomorrow(LocalDateTime dateTime, boolean isTomorrow) {
+        LocalDateTime originalDateTime = LocalDateTime.of(dateTime.toLocalDate(), dateTime.toLocalTime());
 
-        calendar=DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(calendar);
-        assertEquals(calendar.getHour(), originalCalendar.getHour());
-        assertEquals(calendar.getMinute(), originalCalendar.getMinute());
-        assertEquals(calendar.getSecond(), LocalDateTime.now().getSecond());
-        assertEquals(calendar.getYear(), LocalDateTime.now().getYear());
-        assertEquals(calendar.getMonth(), LocalDateTime.now().getMonth());
+        dateTime = DateUtils.adjustToTomorrowIfBeforeOrEqualCurrentTime(dateTime);
+        assertEquals(dateTime.getHour(), originalDateTime.getHour());
+        assertEquals(dateTime.getMinute(), originalDateTime.getMinute());
+        assertEquals(dateTime.getSecond(), LocalDateTime.now().getSecond());
+        assertEquals(dateTime.getYear(), LocalDateTime.now().getYear());
+        assertEquals(dateTime.getMonth(), LocalDateTime.now().getMonth());
 
-        LocalDateTime dayCalendar = LocalDateTime.now();
-        dayCalendar = dayCalendar.plusDays(isTomorrow ? 1 : 0);
-        assertEquals(dayCalendar.getDayOfMonth(),calendar.getDayOfMonth());
+        LocalDateTime dayDateTime = LocalDateTime.now();
+        dayDateTime = dayDateTime.plusDays(isTomorrow ? 1 : 0);
+        assertEquals(dayDateTime.getDayOfMonth(), dateTime.getDayOfMonth());
     }
 
     @Test
-    public void getCalendarHourAndMinute() {
+    public void getLocalTimeHourAndMinute() {
         assertLocalTimeIsTime(DateUtils.getTime(0, 0), 0, 0);
         assertLocalTimeIsTime(DateUtils.getTime(5, 10), 5, 10);
         assertLocalTimeIsTime(DateUtils.getTime(23, 59), 23, 59);
     }
 
     @Test
-    public void getCalendarMillis() {
+    public void getLocalTimeMillis() {
         assertEquals(12345, DateUtils.getTime(12345).toSecondOfDay());
     }
 }
-// todo eradicate the word calendar

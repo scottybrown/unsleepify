@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.Calendar;
 
 public class DateUtils {
     public static LocalTime getTimeEightHoursFromNow() {
@@ -23,10 +22,8 @@ public class DateUtils {
     }
 
     public static String getTimeDifferenceString(LocalDateTime dateTime) {
-        //todo
-        Calendar nowWithNoSeconds = Calendar.getInstance();
-        nowWithNoSeconds.set(Calendar.SECOND, 0);
-        long timeDifferenceInMillis = DateUtils.getMillis(dateTime) - nowWithNoSeconds.getTime().getTime();
+        LocalDateTime nowWithNoSeconds = LocalDateTime.now().withSecond(0);
+        long timeDifferenceInMillis = DateUtils.getMillis(dateTime) - DateUtils.getMillis(nowWithNoSeconds);
         long timeDifferenceInMins = timeDifferenceInMillis / (60000);
         long timeDifferenceInHours = timeDifferenceInMins / 60;
         long minutesRemainder = timeDifferenceInMins % 60;
@@ -44,11 +41,10 @@ public class DateUtils {
     }
 
     public static LocalDateTime adjustToTomorrowIfBeforeOrEqualCurrentTime(LocalDateTime dateTime) {
-        boolean isCurrentHour =
-                LocalTime.now().getHour() == dateTime.getHour();
+        boolean isCurrentHour = LocalTime.now().getHour() == dateTime.getHour();
         boolean isCurrentMinute = LocalTime.now().getMinute() == dateTime.getMinute();
         boolean isCurrentTime = isCurrentHour && isCurrentMinute;
-// todo might be a localtimey way to do this
+
         if (LocalDateTime.now().isAfter(dateTime) || isCurrentTime) {
             dateTime = dateTime.plusDays(1);
         }
@@ -65,8 +61,8 @@ public class DateUtils {
 
     public static LocalDateTime getLocalDateTime(LocalTime alarmTime) {
         LocalDateTime dateTime = LocalDateTime.now();
-        dateTime=dateTime.withHour(alarmTime.getHour());
-        dateTime=dateTime.withMinute(alarmTime.getMinute());
+        dateTime = dateTime.withHour(alarmTime.getHour());
+        dateTime = dateTime.withMinute(alarmTime.getMinute());
         return dateTime;
     }
 }

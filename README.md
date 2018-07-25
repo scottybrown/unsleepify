@@ -14,6 +14,7 @@ Uses Spotify, who have a history of banning such use of their API. This is not f
 - more tests
 
 ## Accomplished TODOs
+- replace all use of calendar/date with Java8 classes
 - Alarm uses alarm volume not main volume
 - icon
 - A button to disable alarm
