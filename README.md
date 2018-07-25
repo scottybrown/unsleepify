@@ -1,7 +1,7 @@
 # Unsleepify
 An alarm app without alarms. Just cool beats and nice melodies to rock you out of your slumber.
 
-Uses Spotify, who have a history of banning such use of their API. This is not for app stores - this is for me and mine.
+Uses Spotify, who may frown upon such use of their API. As such this is not for Play store distribution.
 
 ## TODO
 - skip song, because that one Sigur Ros song is just too much
