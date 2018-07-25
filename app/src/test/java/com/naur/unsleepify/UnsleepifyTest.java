@@ -3,10 +3,12 @@ package com.naur.unsleepify;
 import org.junit.Test;
 
 import java.util.Calendar;
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
 public class UnsleepifyTest {
+    // todo don't use calendar. use jodatime. or...android equiv? given it's somewhere past java 6
     @Test
     public void canSkipAheadEightHours() {
         assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(0, 0), 8, 0);
@@ -14,18 +16,16 @@ public class UnsleepifyTest {
         assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(16, 35), 0, 35);
         assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(17, 0), 1, 0);
         assertCalendarIsTime(DateUtils.getTimeEightHoursFromTime(20, 0), 4, 0);
-
     }
 
     private void assertCalendarIsTime(Calendar calendar, int hour, int minute) {
         assertEquals(calendar.get(Calendar.HOUR_OF_DAY), hour);
         assertEquals(calendar.get(Calendar.MINUTE), minute);
-        assertEquals(calendar.get(Calendar.SECOND), Calendar.getInstance().get(Calendar.SECOND));
+        assertEquals(calendar.get(Calendar.SECOND),0);
     }
 
     @Test
     public void getTimeDifferenceString() {
-        Calendar now = Calendar.getInstance();
         Calendar timeToTest = Calendar.getInstance();
         assertEquals(buildExpectedTimeDifferenceString(0, 0), DateUtils.getTimeDifferenceString(timeToTest));
         timeToTest.add(Calendar.MINUTE, 1);
@@ -49,7 +49,7 @@ public class UnsleepifyTest {
     }
 
     private String buildExpectedTimeDifferenceString(int hour, int minute) {
-        String pluralS = minute == 1 ? "s" : "";
+        String pluralS = minute == 1 ? "" : "s";
         return "Alarm set for " + hour + " hours, " + minute + " minute" + pluralS + " from now";
     }
 
@@ -82,4 +82,16 @@ public class UnsleepifyTest {
         dayCalendar.add(Calendar.DAY_OF_MONTH, isTomorrow ? 1 : 0);
         assertEquals(calendar.get(Calendar.DAY_OF_MONTH), dayCalendar.get(Calendar.DAY_OF_MONTH));
     }
-}
+
+    @Test
+    public void getCalendarHourAndMinute() {
+        assertCalendarIsTime(DateUtils.getCalendar(0, 0), 0, 0);
+        assertCalendarIsTime(DateUtils.getCalendar(5, 10), 5, 10);
+        assertCalendarIsTime(DateUtils.getCalendar(23, 59), 23, 59);
+    }
+
+    @Test
+    public void getCalendarMillis() {
+        assertEquals(123456,DateUtils.getCalendar(123456).getTimeInMillis());
+    }
+    }

@@ -44,16 +44,11 @@ public class DateUtils {
         }
     }
 
-    public static Calendar calculateAlarmTimeOnly() {
-        Calendar time = getTimeEightHoursFromNow();
-        time.set(Calendar.SECOND, 0);
-        return time;
-    }
-
     public static Calendar getCalendar(int hour, int minute) {
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.HOUR_OF_DAY, hour);
         cal.set(Calendar.MINUTE, minute);
+        cal.set(Calendar.SECOND, 0);
         return cal;
     }
 

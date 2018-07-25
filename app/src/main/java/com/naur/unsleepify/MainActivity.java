@@ -21,6 +21,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 
 import static com.naur.unsleepify.DateUtils.getCalendar;
+import static com.naur.unsleepify.DateUtils.getTimeEightHoursFromNow;
 
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
@@ -73,7 +74,7 @@ public class MainActivity extends Activity {
         minutePicker.setMinValue(0);
         minutePicker.setMaxValue(59);
 
-        Calendar defaultTime = DateUtils.calculateAlarmTimeOnly();
+        Calendar defaultTime = getTimeEightHoursFromNow();
         hourPicker.setValue(defaultTime.get(Calendar.HOUR_OF_DAY));
         minutePicker.setValue(defaultTime.get(Calendar.MINUTE));
     }
@@ -102,7 +103,6 @@ public class MainActivity extends Activity {
     }
 
     public PendingIntent setupBroadcastIntent() {
-        AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(this.getApplicationContext(), AlarmReceiver.class);
         return PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
     }

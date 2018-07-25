@@ -30,7 +30,9 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     private static final int REQUEST_CODE = 1337;
     private TextView view;
     private SpotifyApi spotifyApi = new SpotifyApi();
-    private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";// todo shouldn't be here
+
+    // todo these will be removed once playlist is made configurable
+    private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";
     private String playlistUserId = "soundrop";
 
     @Override
@@ -83,7 +85,7 @@ public class SongPlayingActivity extends Activity implements SpotifyPlayer.Notif
     }
 
     private void playPlaylistInOrder(final Player musicPlayer, int index) {
-        musicPlayer.playUri(null, "spotify:playlist:3pBnQakqa3Cd13p4qQP5Rn", index, 0);
+        musicPlayer.playUri(null, "spotify:playlist:"+playlistId, index, 0);
     }
 
     private void playRandomSongFromPlaylist(final Player musicPlayer) {
