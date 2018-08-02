@@ -9,4 +9,8 @@
         <item name="android:src">@drawable/background4</item>
     </style>
 
+    <style name="NumberPickerText">
+        <item name="android:textSize">30dp</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

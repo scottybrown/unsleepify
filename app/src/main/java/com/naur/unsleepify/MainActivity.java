@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -83,9 +84,12 @@ public class MainActivity extends Activity {
         long existingAlarmLong = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM);
         if (existingAlarmLong != DEFULT_SAVED_ALARM) {
             LocalTime existingAlarm = getTime(existingAlarmLong);
-            existingAlarmText.setText(existingAlarm.getHour() + ":" + existingAlarm.getMinute());
+            String hour = Utils.leftPad(existingAlarm.getHour(), 0, 2);
+            String minute = Utils.leftPad(existingAlarm.getMinute(), 0, 2);
+            existingAlarmText.setText(hour + ":" + minute);
+            // todo resource string with placeholders
         } else {
-            existingAlarmText.setText("No alarm set...");
+            existingAlarmText.setText("- -:- -");
         }
     }
 
@@ -94,7 +98,7 @@ public class MainActivity extends Activity {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         int alarmMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        alarmVolumeText.setText("Alarm volume: " + percentageOf(alarmVolume, alarmMaxVolume) + "%");
+        alarmVolumeText.setText(+ percentageOf(alarmVolume, alarmMaxVolume) + "% Volume");
     }
 
     private int percentageOf(int number, int max) {

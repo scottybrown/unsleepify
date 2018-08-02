@@ -93,4 +93,13 @@ public class UnsleepifyTest {
     public void getLocalTimeMillis() {
         assertEquals(12345, DateUtils.getTime(12345).toSecondOfDay());
     }
+
+    @Test
+    public void leftPad() {
+        assertEquals("000123", Utils.leftPad(123,0,6));
+        assertEquals("00000123", Utils.leftPad(123,0,8));
+        assertEquals("123", Utils.leftPad(123,0,3));
+        assertEquals("123", Utils.leftPad(123,0,2));
+        assertEquals("00" ,Utils.leftPad(0,0,2));
+    }
 }

@@ -9,4 +9,8 @@ public class Utils {
     public static void toastify(String text, Context applicationContext) {
         Toast.makeText(applicationContext, text, Toast.LENGTH_SHORT).show();
     }
+
+    public static String leftPad(int number, int paddingDigit, int width) {
+        return String.format("%" + paddingDigit + width + "d", number);
+    }
 }

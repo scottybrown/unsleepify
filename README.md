@@ -4,16 +4,17 @@ An alarm app without alarms. Just cool beats and nice melodies to rock you out o
 Uses Spotify, who may frown upon such use of their API. As such this is not for Play store distribution.
 
 ## TODO
+- don't use set text - replace resource text with placeholders
 - skip song, because that one Sigur Ros song is just too much
-- Properly format time of currently set alarm
-- Improve UI for text and buttons
 - Notification before and during alarm for easy access, no surprises, good experience
 - Show art for song being played - either in notification like Spotify, or whole background
 - Configure a playlist in GUI rather than a hardcoded list
-- Error handling - hitting Spotify API can bring all sorts of issues - I'd like those to at least be debuggable
-- more tests
 
 ## Accomplished TODOs
+- Properly format time of currently set alarm
+- Improve UI for text and buttons
+- more tests
+- Error handling - hitting Spotify API can bring all sorts of issues - I'd like those to at least be debuggable
 - replace all use of calendar/date with Java8 classes
 - Alarm uses alarm volume not main volume
 - icon
