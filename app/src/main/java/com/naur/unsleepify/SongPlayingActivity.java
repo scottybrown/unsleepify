@@ -4,140 +4,150 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
+//need to try the sample app. if it works, reverse engineer it.
 
-import com.spotify.sdk.android.authentication.AuthenticationClient;
-import com.spotify.sdk.android.authentication.AuthenticationRequest;
-import com.spotify.sdk.android.authentication.AuthenticationResponse;
-import com.spotify.sdk.android.player.Config;
-import com.spotify.sdk.android.player.ConnectionStateCallback;
-import com.spotify.sdk.android.player.Error;
-import com.spotify.sdk.android.player.Player;
-import com.spotify.sdk.android.player.PlayerEvent;
-import com.spotify.sdk.android.player.Spotify;
-import com.spotify.sdk.android.player.SpotifyPlayer;
+import com.spotify.android.appremote.api.ConnectionParams;
+import com.spotify.android.appremote.api.Connector;
+import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.client.Subscription;
+import com.spotify.protocol.types.PlayerState;
+import com.spotify.protocol.types.Track;
 
 import java.util.List;
 import java.util.Random;
 
-import kaaes.spotify.webapi.android.SpotifyApi;
-import kaaes.spotify.webapi.android.models.PlaylistTrack;
-
-public class SongPlayingActivity extends Activity implements SpotifyPlayer.NotificationCallback, ConnectionStateCallback {
+public class SongPlayingActivity extends Activity {
     public static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
-    private Player musicPlayer;
     private static final int REQUEST_CODE = 1337;
-    private TextView view;
-    private SpotifyApi spotifyApi = new SpotifyApi();
+    private TextView view;    private SpotifyAppRemote mSpotifyAppRemote;
 
     // todo these will be removed once playlist is made configurable
     private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";
     private String playlistUserId = "soundrop";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onStart( ) {
+        super.onStart();
         setContentView(R.layout.activity_song_playing);
         view = findViewById(R.id.songDetails);
 
-        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
-        AuthenticationRequest request = builder.build();
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-    }
+        ConnectionParams connectionParams =
+                new ConnectionParams.Builder(CLIENT_ID)
+                        .setRedirectUri(REDIRECT_URI)
+                        .showAuthView(true)
+                        .build();
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
-        super.onActivityResult(requestCode, resultCode, intent);
-        if (requestCode == REQUEST_CODE) {
-            final AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
-            if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                spotifyApi.setAccessToken(response.getAccessToken());
-                Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
-                SpotifyPlayer player = Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
+        SpotifyAppRemote.connect(this, connectionParams,
+                new Connector.ConnectionListener() {
 
-                    @Override
-                    public void onInitialized(SpotifyPlayer spotifyPlayer) {
-                        musicPlayer = spotifyPlayer;
-                        musicPlayer.addConnectionStateCallback(SongPlayingActivity.this);
-                        musicPlayer.addNotificationCallback(SongPlayingActivity.this);
+            // todo break up
+                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+                        mSpotifyAppRemote = spotifyAppRemote;
+                        Log.d("MainActivity", "scott"+"Connected! Yay!");
+
+                        // Now you can start interacting with App Remote
+                        connected();
+
                     }
 
-                    @Override
-                    public void onError(Throwable throwable) {
+                    public void onFailure(Throwable throwable) {
+                        Log.e("MyActivity", "scott"+throwable.getMessage(), throwable);
+
+                        // Something went wrong when attempting to connect! Handle errors here
                     }
                 });
-            }
-        }
     }
+
+
+
+    private void connected() {
+        // Play a playlist
+        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:"+playlistId);
+
+        // Subscribe to PlayerState
+        mSpotifyAppRemote.getPlayerApi()
+                .subscribeToPlayerState()
+                .setEventCallback(new Subscription.EventCallback<PlayerState>() {
+                    @Override
+                    public void onEvent(PlayerState playerState) {
+                        final Track track = playerState.track;
+                        if (track != null) {
+                            Log.d("MainActivity", "scott"+track.name + " by " + track.artist.name);
+                        }
+                    }
+                });
+    }
+
 
     @Override
     protected void onDestroy() {
-        Spotify.destroyPlayer(this);
+        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
         super.onDestroy();
     }
 
-    private void updateTextToSongInformation() {
-        if (musicPlayer.getMetadata().currentTrack != null) {
-            view.setText(musicPlayer.getMetadata().currentTrack.artistName + " - " + musicPlayer.getMetadata().currentTrack.name);
-        }
-    }
+//    private void updateTextToSongInformation() {
+//        if (musicPlayer.getMetadata().currentTrack != null) {
+//            view.setText(musicPlayer.getMetadata().currentTrack.artistName + " - " + musicPlayer.getMetadata().currentTrack.name);
+//        }
+//    }
 
-    private void playPlaylistInOrder(final Player musicPlayer, int index) {
-        musicPlayer.playUri(null, "spotify:playlist:"+playlistId, index, 0);
-    }
+//    private void playPlaylistInOrder(final Player musicPlayer, int index) {
+//        musicPlayer.playUri(null, "spotify:playlist:"+playlistId, index, 0);
+//    }
+//
+//    private void playRandomSongFromPlaylist(final Player musicPlayer) {
+//        new AsyncTask<Player, Void, Void>() {
+//            @Override
+//            protected Void doInBackground(Player... strings) {
+//
+//                List<PlaylistTrack> playlistTracks = spotifyApi.getService().getPlaylistTracks(playlistUserId, playlistId).items;
+//                int randomTrackIndex = new Random().nextInt(playlistTracks.size());
+//                playPlaylistInOrder(musicPlayer, randomTrackIndex);
+//                return null;
+//            }
+//        }.execute(musicPlayer);
+//    }
 
-    private void playRandomSongFromPlaylist(final Player musicPlayer) {
-        new AsyncTask<Player, Void, Void>() {
-            @Override
-            protected Void doInBackground(Player... strings) {
-
-                List<PlaylistTrack> playlistTracks = spotifyApi.getService().getPlaylistTracks(playlistUserId, playlistId).items;
-                int randomTrackIndex = new Random().nextInt(playlistTracks.size());
-                playPlaylistInOrder(musicPlayer, randomTrackIndex);
-                return null;
-            }
-        }.execute(musicPlayer);
-    }
-
-    @Override
-    public void onLoggedIn() {
-        musicPlayer.setShuffle(null, true);
-        playRandomSongFromPlaylist(musicPlayer);
-    }
-
-    @Override
-    public void onPlaybackEvent(PlayerEvent playerEvent) {
-        if (PlayerEvent.kSpPlaybackNotifyTrackChanged.equals(playerEvent)) {
-            updateTextToSongInformation();
-        }
-
-    }
-
-    @Override
-    public void onPlaybackError(Error error) {
-        if (error == Error.kSpErrorFailed) {
-            Utils.toastify("Error playing, perhaps we got to the end of the playlist. Trying another track.", this);
-        } else {
-            Utils.toastify("Error playing, retrying. Details: "+error.name()+": "+error.toString(), this);
-        }
-        playRandomSongFromPlaylist(musicPlayer);
-    }
-
-    @Override
-    public void onLoggedOut() {
-    }
-
-    @Override
-    public void onLoginFailed(Error var1) {
-    }
-
-    @Override
-    public void onTemporaryError() {
-    }
-
-    @Override
-    public void onConnectionMessage(String message) {
-    }
+//    @Override
+//    public void onLoggedIn() {
+//        musicPlayer.setShuffle(null, true);
+//        playRandomSongFromPlaylist(musicPlayer);
+//    }
+//
+//    @Override
+//    public void onPlaybackEvent(PlayerEvent playerEvent) {
+//        if (PlayerEvent.kSpPlaybackNotifyTrackChanged.equals(playerEvent)) {
+//            updateTextToSongInformation();
+//        }
+//
+//    }
+//
+//    @Override
+//    public void onPlaybackError(Error error) {
+//        if (error == Error.kSpErrorFailed) {
+//            Utils.toastify("Error playing, perhaps we got to the end of the playlist. Trying another track.", this);
+//        } else {
+//            Utils.toastify("Error playing, retrying. Details: "+error.name()+": "+error.toString(), this);
+//        }
+//        playRandomSongFromPlaylist(musicPlayer);
+//    }
+//
+//    @Override
+//    public void onLoggedOut() {
+//    }
+//
+//    @Override
+//    public void onLoginFailed(Error var1) {
+//    }
+//
+//    @Override
+//    public void onTemporaryError() {
+//    }
+//
+//    @Override
+//    public void onConnectionMessage(String message) {
+//    }
 }
