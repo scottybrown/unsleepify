@@ -1,12 +1,10 @@
 package com.naur.unsleepify;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
-import android.os.AsyncTask;
-import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
-//need to try the sample app. if it works, reverse engineer it.
 
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
@@ -15,21 +13,17 @@ import com.spotify.protocol.client.Subscription;
 import com.spotify.protocol.types.PlayerState;
 import com.spotify.protocol.types.Track;
 
-import java.util.List;
-import java.util.Random;
-
 public class SongPlayingActivity extends Activity {
     public static final String CLIENT_ID = "6e71d381582a43f2aa3c0366bbe48ea3";
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
-    private static final int REQUEST_CODE = 1337;
-    private TextView view;    private SpotifyAppRemote mSpotifyAppRemote;
+    private TextView view;
+    private SpotifyAppRemote spotifyAppRemote;
 
     // todo these will be removed once playlist is made configurable
     private String playlistId = "3pBnQakqa3Cd13p4qQP5Rn";
-    private String playlistUserId = "soundrop";
 
     @Override
-    protected void onStart( ) {
+    protected void onStart() {
         super.onStart();
         setContentView(R.layout.activity_song_playing);
         view = findViewById(R.id.songDetails);
@@ -43,40 +37,41 @@ public class SongPlayingActivity extends Activity {
         SpotifyAppRemote.connect(this, connectionParams,
                 new Connector.ConnectionListener() {
 
-            // todo break up
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                        mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("MainActivity", "scott"+"Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
+                    public void onConnected(SpotifyAppRemote spotifyAppRemoteParam) {
+                        spotifyAppRemote = spotifyAppRemoteParam;
                         connected();
 
                     }
 
                     public void onFailure(Throwable throwable) {
-                        Log.e("MyActivity", "scott"+throwable.getMessage(), throwable);
-
-                        // Something went wrong when attempting to connect! Handle errors here
                     }
                 });
     }
 
 
-
     private void connected() {
-        // Play a playlist
-        mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:"+playlistId);
+        spotifyAppRemote.getPlayerApi().setShuffle(true);
+        spotifyAppRemote.getPlayerApi().play("spotify:playlist:" + playlistId);
 
-        // Subscribe to PlayerState
-        mSpotifyAppRemote.getPlayerApi()
+        startActivity(getPackageManager().getLaunchIntentForPackage("com.spotify.music"));
+        // launching the app is better than showing my own, so delete that code.
+        spotifyAppRemote.getPlayerApi()
                 .subscribeToPlayerState()
                 .setEventCallback(new Subscription.EventCallback<PlayerState>() {
                     @Override
                     public void onEvent(PlayerState playerState) {
-                        final Track track = playerState.track;
-                        if (track != null) {
-                            Log.d("MainActivity", "scott"+track.name + " by " + track.artist.name);
+//                        final Track track = playerState.track;
+//                        if (track != null) {
+//                            Log.d("MainActivity", "scott" + track.name + " by " + track.artist.name);
+//                        }
+//                        playerState.
+                        if(!playerState.isPaused){
+                            spotifyAppRemote.getPlayerApi().setShuffle(false);
+
                         }
+                        System.out.println("scott theevent"+playerState.isPaused+playerState
+                                +playerState.track.name);
+//                        spotifyAppRemote.getPlayerApi().setShuffle(false);
                     }
                 });
     }
@@ -84,9 +79,10 @@ public class SongPlayingActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+        SpotifyAppRemote.disconnect(spotifyAppRemote);
         super.onDestroy();
     }
+
 
 //    private void updateTextToSongInformation() {
 //        if (musicPlayer.getMetadata().currentTrack != null) {
