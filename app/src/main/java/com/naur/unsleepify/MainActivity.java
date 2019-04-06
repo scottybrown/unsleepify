@@ -1,7 +1,6 @@
 package com.naur.unsleepify;
 
 import android.annotation.TargetApi;
-import android.app.ActionBar;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
@@ -13,10 +12,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
@@ -24,24 +23,28 @@ import static com.naur.unsleepify.DateUtils.getTime;
 import static com.naur.unsleepify.DateUtils.getTimeEightHoursFromNow;
 
 public class MainActivity extends Activity {
-    public static final String SAVED_ALARM_IN_MILLIS = "SAVED_ALARM_IN_MILLIS";
-    public static final int DEFULT_SAVED_ALARM = -1;
+    public static final String SAVED_ALARM_IN_MILLIS_KEY = "SAVED_ALARM_IN_MILLIS";
+    public static final String SAVED_PLAYLIST_ID_KEY = "SAVED_PLAYLIST_ID";
+    public static final int DEFAULT_SAVED_ALARM = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 
         initializeNumberPickers();
         updateAlarmVolumeText();
         updateExistingAlarmText();
+        updatePlaylistIDText();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         findViewById(R.id.SubmitButton).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 LocalTime alarmTime = getTime(getHourPicker().getValue(), getMinutePicker().getValue());
-                writePreference(SAVED_ALARM_IN_MILLIS, alarmTime.toSecondOfDay());
+                writePreference(SAVED_ALARM_IN_MILLIS_KEY, alarmTime.toSecondOfDay());
+                writePreference(SAVED_PLAYLIST_ID_KEY, ((EditText) findViewById(R.id.PlaylistId)).getText().toString());
                 updateExistingAlarmText();
 
                 LocalDateTime alarmDateTime = DateUtils.getLocalDateTime(alarmTime);
@@ -49,7 +52,8 @@ public class MainActivity extends Activity {
                 setupRepeatingBroadcastReceiver(alarmDateTime);
                 Utils.toastify(DateUtils.getTimeDifferenceString(alarmDateTime), getApplicationContext());
 
-                updateAlarmVolumeText();// TODO better in some callback to keep it up to date when the user changes it. but simpler this way
+                // TODO better in some callback to keep it up to date when the user changes it. but simpler this way
+                updateAlarmVolumeText();
             }
         });
 
@@ -58,7 +62,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 cancelBroadcastReceiver();
-                writePreference(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM);
+                writePreference(SAVED_ALARM_IN_MILLIS_KEY, DEFAULT_SAVED_ALARM);
                 Utils.toastify("Alarm cancelled", getApplicationContext());
                 updateExistingAlarmText();
             }
@@ -81,16 +85,21 @@ public class MainActivity extends Activity {
 
     private void updateExistingAlarmText() {
         TextView existingAlarmText = findViewById(R.id.ExistingAlarm);
-        long existingAlarmLong = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS, DEFULT_SAVED_ALARM);
-        if (existingAlarmLong != DEFULT_SAVED_ALARM) {
+        long existingAlarmLong = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS_KEY, DEFAULT_SAVED_ALARM);
+        if (existingAlarmLong != DEFAULT_SAVED_ALARM) {
             LocalTime existingAlarm = getTime(existingAlarmLong);
             String hour = Utils.leftPad(existingAlarm.getHour(), 0, 2);
             String minute = Utils.leftPad(existingAlarm.getMinute(), 0, 2);
             existingAlarmText.setText(hour + ":" + minute);
-            // todo resource string with placeholders
         } else {
             existingAlarmText.setText("- -:- -");
         }
+    }
+
+    private void updatePlaylistIDText() {
+        TextView playlistIdText = findViewById(R.id.PlaylistId);
+        String existingPlaylistId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SAVED_PLAYLIST_ID_KEY, getString(R.string.default_playlist_id));
+        playlistIdText.setText(existingPlaylistId);
     }
 
     private void updateAlarmVolumeText() {
@@ -98,7 +107,7 @@ public class MainActivity extends Activity {
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         int alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
         int alarmMaxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-        alarmVolumeText.setText(+ percentageOf(alarmVolume, alarmMaxVolume) + "% Volume");
+        alarmVolumeText.setText(+percentageOf(alarmVolume, alarmMaxVolume) + "% Volume");
     }
 
     private int percentageOf(int number, int max) {
@@ -123,6 +132,12 @@ public class MainActivity extends Activity {
     private void writePreference(String preferenceKey, long preference) {
         SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
         editor.putLong(preferenceKey, preference);
+        editor.apply();
+    }
+
+    private void writePreference(String preferenceKey, String preference) {
+        SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).edit();
+        editor.putString(preferenceKey, preference);
         editor.apply();
     }
 

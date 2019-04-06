@@ -12,6 +12,7 @@ Uses Spotify, who may frown upon such use of their API. As such this is not for 
 	- also ideally it would display the album art for each playlist, or some identifying factor to differentiate those that share the same name
 
 ## Accomplished TODOs
+- if you manually travel to the song playing activity it shouldn't play a song. should go back to the main activity
 - Show art for song being played - either in notification like Spotify, or whole background - i get this for free by yielding control to the spotify app
 - skip song, because that one Sigur Ros song is just too much - i get this for free by yielding control to the spotify app
 - Properly format time of currently set alarm

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:andriod="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    xmlns:andriod="http://schemas.android.com/apk/res-auto"
     android:background="#000000">
 
     <ImageView
@@ -30,16 +30,14 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:theme="@style/NumberPickerText"
-                />
+                android:theme="@style/NumberPickerText" />
 
             <NumberPicker
                 android:id="@+id/MinutePicker"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="0.5"
-                android:theme="@style/NumberPickerText"
-                />
+                android:theme="@style/NumberPickerText" />
         </LinearLayout>
 
         <LinearLayout
@@ -52,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="80dp"
                 android:paddingVertical="20dp"
-                android:text="Make alarm yo" />
+                android:text="Set alarm" />
         </LinearLayout>
 
         <LinearLayout
@@ -62,26 +60,56 @@
             <Button
                 android:id="@+id/CancelButton"
                 android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginHorizontal="80dp"
                 android:paddingVertical="20dp"
-                android:layout_height="wrap_content"
                 android:text="Unset alarm" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            >
+            android:layout_height="wrap_content">
 
             <TextView
                 android:id="@+id/ExistingAlarm"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="No alarm set..."
-                android:textColor="#FFFFFF"
                 android:textAlignment="center"
-                android:textSize="300px"
-                />
+                android:textColor="@color/primary"
+                android:textSize="300px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/PlaylistIdLabel"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Playlist ID:"
+                android:textAlignment="center"
+
+                android:textColor="@color/primary"
+                android:textSize="100px" />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/PlaylistId"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:inputType="text"
+                android:text="@string/default_playlist_id"
+                android:textAlignment="center"
+
+                android:textSize="70px" />
         </LinearLayout>
 
         <LinearLayout
@@ -95,10 +123,9 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="Not yet loaded..."
-                android:textColor="#FFFFFF"
                 android:textAlignment="center"
-                android:textSize="100px"
-                />
+                android:textColor="@color/primary"
+                android:textSize="100px" />
         </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
