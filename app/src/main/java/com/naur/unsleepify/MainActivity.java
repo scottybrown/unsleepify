@@ -3,6 +3,8 @@ package com.naur.unsleepify;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -27,6 +29,17 @@ public class MainActivity extends Activity {
     public static final String SAVED_PLAYLIST_ID_KEY = "SAVED_PLAYLIST_ID";
     public static final String EXCLUDED_ARTISTS_KEY = "EXCLUDED_ARTISTS_KEY";
     public static final int DEFAULT_SAVED_ALARM = -1;
+    public static final String NOTIFICATION_CHANNEL_ID = "1";
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "pre_alarm_notification", importance);
+            channel.setDescription("Notification before the alarm, giving user a chance to skip it if they're awake");
+            getSystemService(NotificationManager.class).createNotificationChannel(channel);
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +47,7 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
 
+        createNotificationChannel();
         initializeNumberPickers();
         updateAlarmVolumeText();
         updateExistingAlarmText();
@@ -91,10 +105,7 @@ public class MainActivity extends Activity {
         TextView existingAlarmText = findViewById(R.id.ExistingAlarm);
         long existingAlarmLong = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getLong(SAVED_ALARM_IN_MILLIS_KEY, DEFAULT_SAVED_ALARM);
         if (existingAlarmLong != DEFAULT_SAVED_ALARM) {
-            LocalTime existingAlarm = getTime(existingAlarmLong);
-            String hour = Utils.leftPad(existingAlarm.getHour(), 0, 2);
-            String minute = Utils.leftPad(existingAlarm.getMinute(), 0, 2);
-            existingAlarmText.setText(hour + ":" + minute);
+            existingAlarmText.setText(Utils.getHourColonMinute(existingAlarmLong));
         } else {
             existingAlarmText.setText("- -:- -");
         }
@@ -124,19 +135,26 @@ public class MainActivity extends Activity {
         return (number * 100) / max;
     }
 
-    public PendingIntent setupBroadcastIntent() {
+    public PendingIntent setupAlarmBroadcastIntent() {
         Intent intent = new Intent(this.getApplicationContext(), AlarmReceiver.class);
+        return PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
+    }
+
+    public PendingIntent setupImpendingAlarmNotificationBroadcastIntent() {
+        Intent intent = new Intent(this.getApplicationContext(), ImpendingAlarmReceiver.class);
         return PendingIntent.getBroadcast(this.getApplicationContext(), 0, intent, 0);
     }
 
     public void setupRepeatingBroadcastReceiver(LocalDateTime dateTime) {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, DateUtils.getMillis(dateTime), AlarmManager.INTERVAL_DAY, setupBroadcastIntent());
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, DateUtils.getMillis(dateTime), AlarmManager.INTERVAL_DAY, setupAlarmBroadcastIntent());
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, DateUtils.getMillis(dateTime.minusMinutes(30)), AlarmManager.INTERVAL_DAY, setupImpendingAlarmNotificationBroadcastIntent());
     }
 
     public void cancelBroadcastReceiver() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(setupBroadcastIntent());
+        alarmManager.cancel(setupAlarmBroadcastIntent());
+        alarmManager.cancel(setupImpendingAlarmNotificationBroadcastIntent());
     }
 
     private void writePreference(String preferenceKey, long preference) {

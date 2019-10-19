@@ -17,10 +17,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".SongPlayingActivity"></activity>
-        <activity
-            android:name="com.spotify.sdk.android.authentication.LoginActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
         <receiver android:name=".AlarmReceiver" />
+        <receiver android:name=".ImpendingAlarmReceiver" />
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />
