@@ -25,6 +25,7 @@ import static com.naur.unsleepify.DateUtils.getTimeEightHoursFromNow;
 public class MainActivity extends Activity {
     public static final String SAVED_ALARM_IN_MILLIS_KEY = "SAVED_ALARM_IN_MILLIS";
     public static final String SAVED_PLAYLIST_ID_KEY = "SAVED_PLAYLIST_ID";
+    public static final String EXCLUDED_ARTISTS_KEY = "EXCLUDED_ARTISTS_KEY";
     public static final int DEFAULT_SAVED_ALARM = -1;
 
     @Override
@@ -37,6 +38,7 @@ public class MainActivity extends Activity {
         updateAlarmVolumeText();
         updateExistingAlarmText();
         updatePlaylistIDText();
+        updateExcludedArtistsText();
         setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
         findViewById(R.id.SubmitButton).setOnClickListener(new View.OnClickListener() {
@@ -45,6 +47,8 @@ public class MainActivity extends Activity {
                 LocalTime alarmTime = getTime(getHourPicker().getValue(), getMinutePicker().getValue());
                 writePreference(SAVED_ALARM_IN_MILLIS_KEY, alarmTime.toSecondOfDay());
                 writePreference(SAVED_PLAYLIST_ID_KEY, ((EditText) findViewById(R.id.PlaylistId)).getText().toString());
+                writePreference(EXCLUDED_ARTISTS_KEY, ((EditText) findViewById(R.id.ExcludedArtists)).getText().toString());
+
                 updateExistingAlarmText();
 
                 LocalDateTime alarmDateTime = DateUtils.getLocalDateTime(alarmTime);
@@ -100,6 +104,12 @@ public class MainActivity extends Activity {
         TextView playlistIdText = findViewById(R.id.PlaylistId);
         String existingPlaylistId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(SAVED_PLAYLIST_ID_KEY, getString(R.string.default_playlist_id));
         playlistIdText.setText(existingPlaylistId);
+    }
+
+    private void updateExcludedArtistsText() {
+        TextView excludedArtistsText = findViewById(R.id.ExcludedArtists);
+        String existingExcludedArtists = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString(EXCLUDED_ARTISTS_KEY, "");
+        excludedArtistsText.setText(existingExcludedArtists);
     }
 
     private void updateAlarmVolumeText() {

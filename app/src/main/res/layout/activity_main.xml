@@ -90,11 +90,8 @@
                 android:layout_height="wrap_content"
                 android:text="Playlist ID:"
                 android:textAlignment="center"
-
                 android:textColor="@color/primary"
                 android:textSize="100px" />
-
-
         </LinearLayout>
 
         <LinearLayout
@@ -108,7 +105,33 @@
                 android:inputType="text"
                 android:text="@string/default_playlist_id"
                 android:textAlignment="center"
+                android:textSize="70px" />
+        </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/ExcludedArtistsLabel"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Excluded Artists:"
+                android:textAlignment="center"
+                android:textColor="@color/primary"
+                android:textSize="100px" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/ExcludedArtists"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:inputType="text"
+                android:textAlignment="center"
                 android:textSize="70px" />
         </LinearLayout>
 
