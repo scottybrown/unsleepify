@@ -18,7 +18,6 @@ import static com.naur.unsleepify.MainActivity.SAVED_ALARM_IN_MILLIS_KEY;
 public class ImpendingAlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        System.out.println("onrec scott");
         showImpendingAlarmNotification(context);
     }
 
@@ -29,7 +28,7 @@ public class ImpendingAlarmReceiver extends BroadcastReceiver {
 
         long existingAlarmLong = PreferenceManager.getDefaultSharedPreferences(context).getLong(SAVED_ALARM_IN_MILLIS_KEY, DEFAULT_SAVED_ALARM);
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_bw)
                 .setContentTitle("Unsleepification due at " + Utils.getHourColonMinute(existingAlarmLong))
                 .setContentText("Tap to change")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT).setContentIntent(pendingIntent)
@@ -37,3 +36,5 @@ public class ImpendingAlarmReceiver extends BroadcastReceiver {
         NotificationManagerCompat.from(context).notify(new Random().nextInt(), builder.build());
     }
 }
+
+
