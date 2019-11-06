@@ -13,6 +13,7 @@ import android.media.AudioManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.NotificationManagerCompat;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.NumberPicker;
@@ -154,7 +155,7 @@ public class MainActivity extends Activity {
     public void cancelBroadcastReceiver() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(setupAlarmBroadcastIntent());
-        alarmManager.cancel(setupImpendingAlarmNotificationBroadcastIntent());
+        NotificationManagerCompat.from(this ).cancelAll();
     }
 
     private void writePreference(String preferenceKey, long preference) {
