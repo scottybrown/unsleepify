@@ -27,6 +27,7 @@ public class SongPlayingActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+        
         Intent startIntent = new Intent(this, MainActivity.class);
         startIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(startIntent);

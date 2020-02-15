@@ -35,7 +35,7 @@ public class MainActivity extends Activity {
     private void createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "pre_alarm_notification", importance);
             channel.setDescription("Notification before the alarm, giving user a chance to skip it if they're awake");
             getSystemService(NotificationManager.class).createNotificationChannel(channel);
@@ -47,7 +47,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
         createNotificationChannel();
         initializeNumberPickers();
         updateAlarmVolumeText();
@@ -155,7 +154,7 @@ public class MainActivity extends Activity {
     public void cancelBroadcastReceiver() {
         AlarmManager alarmManager = (AlarmManager) this.getApplicationContext().getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(setupAlarmBroadcastIntent());
-        NotificationManagerCompat.from(this ).cancelAll();
+        NotificationManagerCompat.from(this).cancelAll();
     }
 
     private void writePreference(String preferenceKey, long preference) {
