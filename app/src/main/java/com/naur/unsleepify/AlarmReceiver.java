@@ -14,27 +14,27 @@ import static com.naur.unsleepify.MainActivity.NOTIFICATION_CHANNEL_ID;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        NotificationManagerCompat.from(context).cancelAll();
+
         Intent startActivityIntent = new Intent(context, SongPlayingActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         PendingIntent startActivityPendingIntent = PendingIntent.getActivity(context, 0,
                 startActivityIntent, 0);
 
+        Intent mainActivityIntent = new Intent(context, MainActivity.class);
+        PendingIntent mainActivityPendingIntent = PendingIntent.getActivity(context, 0,
+                mainActivityIntent, 0);
+
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
                         .setSmallIcon(R.drawable.ic_bw)
-                        .setContentTitle("Unsleepifying now!")
-                        .setContentText("Tap to open")
+                        .setContentTitle("Unsleepify is alarming!")
                         .setPriority(NotificationCompat.PRIORITY_MAX)
                         .setCategory(NotificationCompat.CATEGORY_ALARM)
                         .setAutoCancel(true)
-                        .setFullScreenIntent(startActivityPendingIntent, true);
+                        .setFullScreenIntent(startActivityPendingIntent, true)
+                        .addAction(R.drawable.ic_bw, "Dismiss", mainActivityPendingIntent);
 
         NotificationManagerCompat.from(context).notify(new Random().nextInt(), notificationBuilder.build());
     }
 }
-// doesn't always play on right device?
-// test when not plugged in
-// make sure to cancel this notif when the activity opens
-// todo add actions to notif?
-// check out the notif when you hover the app's icon
-// is due at notif getting set at the right time?

@@ -33,13 +33,10 @@ public class MainActivity extends Activity {
     public static final String NOTIFICATION_CHANNEL_ID = "1";
 
     private void createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "pre_alarm_notification", importance);
-            channel.setDescription("Notification before the alarm, giving user a chance to skip it if they're awake");
-            getSystemService(NotificationManager.class).createNotificationChannel(channel);
-        }
+         int importance = NotificationManager.IMPORTANCE_HIGH;
+         NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "pre_alarm_notification", importance);
+         channel.setDescription("Notification before the alarm, giving user a chance to skip it if they're awake");
+         getSystemService(NotificationManager.class).createNotificationChannel(channel);
     }
 
     @Override
@@ -47,6 +44,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
+        NotificationManagerCompat.from(this).cancelAll();
         createNotificationChannel();
         initializeNumberPickers();
         updateAlarmVolumeText();
