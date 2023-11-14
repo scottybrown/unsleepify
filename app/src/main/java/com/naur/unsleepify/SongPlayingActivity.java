@@ -35,9 +35,17 @@ public class SongPlayingActivity extends Activity {
         startActivity(startIntent);
     }
 
+    public void stopService() {
+        Intent serviceIntent = new Intent(this, ForegroundService.class);
+        stopService(serviceIntent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        System.out.println("scott songplaying start");
         super.onCreate(savedInstanceState);
+
+        stopService();
 
         setContentView(R.layout.activity_song_playing);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);

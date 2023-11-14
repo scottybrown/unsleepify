@@ -14,6 +14,7 @@ import static com.naur.unsleepify.MainActivity.NOTIFICATION_CHANNEL_ID;
 public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
+        System.out.println("scott alarmreceiver start");
         NotificationManagerCompat.from(context).cancelAll();
 
         Intent startActivityIntent = new Intent(context, SongPlayingActivity.class);
@@ -36,5 +37,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                         .addAction(R.drawable.ic_bw, "Dismiss", mainActivityPendingIntent);
 
         NotificationManagerCompat.from(context).notify(new Random().nextInt(), notificationBuilder.build());
+        System.out.println("scott alarmreceiver end");
+
     }
 }
